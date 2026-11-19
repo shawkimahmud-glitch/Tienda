@@ -1,0 +1,12 @@
+{%- comment -%} Outputs the lowest price of the product, or the fallback text. {%- endcomment -%}
+{%- liquid
+  assign fe_p = product
+  if fe_p == blank
+    assign fe_p = all_products['mapa-estelar-personalizado-el-cielo-de-vuestra-noche']
+  endif
+  if fe_p != blank and fe_p.price_min > 0
+    echo fe_p.price_min | money
+  else
+    echo fallback
+  endif
+-%}

@@ -1,0 +1,61 @@
+{
+  "layout": "fe-cosmos",
+  "sections": {
+    "journey": { "type": "fe-journey", "settings": {} },
+    "instant": { "type": "fe-instant", "settings": {} },
+    "creator": { "type": "fe-creator", "settings": {} },
+    "ribbon": {
+      "type": "fe-ribbon",
+      "blocks": {
+        "o1": { "type": "item", "settings": { "text": "Aniversarios" } },
+        "o2": { "type": "item", "settings": { "text": "Bodas" } },
+        "o3": { "type": "item", "settings": { "text": "Nacimientos" } },
+        "o4": { "type": "item", "settings": { "text": "San Valentín" } },
+        "o5": { "type": "item", "settings": { "text": "Navidad" } },
+        "o6": { "type": "item", "settings": { "text": "Pedidas de mano" } },
+        "o7": { "type": "item", "settings": { "text": "La primera cita" } },
+        "o8": { "type": "item", "settings": { "text": "Para recordar a alguien" } }
+      },
+      "block_order": ["o1", "o2", "o3", "o4", "o5", "o6", "o7", "o8"],
+      "settings": { "speed": 46 }
+    },
+    "stories": {
+      "type": "fe-stories",
+      "blocks": {
+        "s1": { "type": "story", "settings": { "kicker": "Pareja", "title": "La noche en que os conocisteis", "text": "Puede que no recordéis qué pedisteis. Las estrellas sí estaban ahí.", "names": "Lucía & Daniel", "phrase": "La noche en que todo empezó", "city": "Madrid", "date": "2021-05-14", "time": "23:41", "style": "noche", "example_label": "Ejemplo · Madrid · 14.05.2021" } },
+        "s2": { "type": "story", "settings": { "kicker": "Boda", "title": "El sí, bajo su propio cielo", "text": "Una boda dura un día. Su cielo puede quedarse en vuestra pared.", "names": "Marta & Javier", "phrase": "Sí, quiero", "city": "Sevilla", "date": "2025-06-21", "time": "22:30", "style": "marfil", "example_label": "Ejemplo · Sevilla · 21.06.2025" } },
+        "s3": { "type": "story", "settings": { "kicker": "Nacimiento", "title": "Su primera noche en el mundo", "text": "El cielo exacto que había cuando llegó, con su nombre y su hora.", "names": "Valeria", "phrase": "Bienvenida al mundo", "city": "Valencia", "date": "2026-02-03", "time": "04:12", "style": "noche", "example_label": "Ejemplo · Valencia · 03.02.2026" } },
+        "s4": { "type": "story", "settings": { "kicker": "Recuerdo", "title": "Para que no se olvide", "text": "Hay fechas que sostienen una vida entera. Guardad la suya.", "names": "Carmen & Ramón", "phrase": "Siempre", "city": "Bilbao", "date": "1968-09-14", "time": "21:00", "style": "marfil", "example_label": "Ejemplo · Bilbao · 14.09.1968" } }
+      },
+      "block_order": ["s1", "s2", "s3", "s4"],
+      "settings": {}
+    },
+    "steps": {
+      "type": "fe-steps",
+      "blocks": {
+        "p1": { "type": "step", "settings": { "icon": "date", "title": "Elegid el instante", "text": "La fecha, la hora y la ciudad. Con eso calculamos qué estrellas había sobre vosotros." } },
+        "p2": { "type": "step", "settings": { "icon": "pen", "title": "Escribid vuestras palabras", "text": "Vuestros nombres y una frase. Veis la lámina cambiar mientras escribís." } },
+        "p3": { "type": "step", "settings": { "icon": "home", "title": "Llega a vuestra casa", "text": "La imprimimos y os la enviamos sin coste a toda España. Plazo de entrega: [PLAZO DE ENTREGA]." } }
+      },
+      "block_order": ["p1", "p2", "p3"],
+      "settings": {}
+    },
+    "faq": {
+      "type": "fe-faq",
+      "blocks": {
+        "q1": { "type": "qa", "settings": { "q": "¿El cielo de la lámina es real?", "a": "<p>Sí. Calculamos la posición de las estrellas visibles desde vuestra ciudad en la fecha y la hora que elijáis, a partir de catálogos astronómicos (Hipparcos y Yale Bright Star). Las líneas doradas unen las constelaciones que había sobre vosotros.</p>" } },
+        "q2": { "type": "qa", "settings": { "q": "¿Y si no sabemos la hora exacta?", "a": "<p>Dejad la que mejor recordéis. Si no la sabéis, usamos las 22:00. El cielo cambia con las horas, así que cuanto más precisa, más fiel será.</p>" } },
+        "q3": { "type": "qa", "settings": { "q": "¿Qué formatos y precios hay?", "a": "<p>Lámina A4 (21×30 cm): 39,95 €. Lámina 30×40 cm: 44,95 €. Lámina 30×40 cm con marco de roble: 79,95 €. El envío está incluido.</p>" } },
+        "q4": { "type": "qa", "settings": { "q": "¿Cuánto cuesta el envío y cuánto tarda?", "a": "<p>El envío es gratis a toda España. Plazo de entrega: [PLAZO DE ENTREGA].</p>" } },
+        "q5": { "type": "qa", "settings": { "q": "¿Llega a tiempo para Navidad?", "a": "<p>Sí, si hacéis el pedido antes del [FECHA LÍMITE NAVIDAD].</p>" } },
+        "q6": { "type": "qa", "settings": { "q": "¿Tengo que crear una cuenta?", "a": "<p>No. Podéis comprar como invitados, solo con un correo para enviaros la confirmación y el seguimiento.</p>" } },
+        "q7": { "type": "qa", "settings": { "q": "¿Puedo ver la lámina antes de pagar?", "a": "<p>Sí. La vista previa se actualiza mientras escribís y la confirmáis antes de pagar.</p>" } },
+        "q8": { "type": "qa", "settings": { "q": "¿Puedo devolverla?", "a": "<p>Al ser un producto personalizado, no tiene derecho de desistimiento (art. 103 del TRLGDCU). Si llega dañada o con un error nuestro, escribidnos: [POLÍTICA DE REPOSICIÓN].</p>" } }
+      },
+      "block_order": ["q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8"],
+      "settings": {}
+    },
+    "finale": { "type": "fe-finale", "settings": {} }
+  },
+  "order": ["journey", "instant", "creator", "ribbon", "stories", "steps", "faq", "finale"]
+}

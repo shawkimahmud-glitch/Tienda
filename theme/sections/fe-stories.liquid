@@ -1,0 +1,64 @@
+<section class="fe-stories" data-fe-stories aria-labelledby="fe-stories-{{ section.id }}">
+  <div class="fe-stories__pin">
+    <div class="fe-wrap fe-stories__head">
+      <h2 id="fe-stories-{{ section.id }}" class="fe-h2" data-reveal="words">{{ section.settings.heading | escape }}</h2>
+      <p class="fe-lede">{{ section.settings.text | escape }}</p>
+    </div>
+    <div class="fe-stories__viewport" tabindex="0" aria-label="{{ section.settings.heading | escape }}, desplazamiento horizontal">
+      <ol class="fe-stories__track" role="list" style="list-style:none;margin:0;padding:0">
+        {%- for block in section.blocks -%}
+          {%- assign b = block.settings -%}
+          <li class="fe-story" {{ block.shopify_attributes }}>
+            <div class="fe-story__poster">
+              {%- if b.image != blank -%}
+                {{ b.image | image_url: width: 1200 | image_tag: loading: 'lazy', widths: '400, 600, 900, 1200', sizes: '(min-width: 900px) 40vw, 84vw', alt: b.image.alt }}
+              {%- else -%}
+                <div data-fe-mini data-names="{{ b.names | escape }}" data-phrase="{{ b.phrase | escape }}" data-city="{{ b.city | escape }}" data-date="{{ b.date | escape }}" data-time="{{ b.time | escape }}" data-style="{{ b.style }}"></div>
+              {%- endif -%}
+            </div>
+            <div>
+              <span class="fe-meta fe-story__kicker">{{ b.kicker | escape }}</span>
+              <h3>{{ b.title | escape }}</h3>
+              <p>{{ b.text | escape }}</p>
+              <span class="fe-meta">{{ b.example_label | escape }}</span>
+            </div>
+          </li>
+        {%- endfor -%}
+      </ol>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FE · Historias",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Titular", "default": "Cada cielo guarda una historia" },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Cuatro maneras de regalar una noche. Las láminas de ejemplo están calculadas con sus fechas y lugares reales." }
+  ],
+  "blocks": [{
+    "type": "story", "name": "Historia",
+    "settings": [
+      { "type": "text", "id": "kicker", "label": "Ocasión", "default": "Pareja" },
+      { "type": "text", "id": "title", "label": "Título", "default": "La noche en que os conocisteis" },
+      { "type": "textarea", "id": "text", "label": "Texto", "default": "Puede que no recordéis qué pedisteis. Las estrellas sí estaban ahí." },
+      { "type": "image_picker", "id": "image", "label": "Foto (opcional, sustituye a la lámina de ejemplo)" },
+      { "type": "text", "id": "names", "label": "Nombres de ejemplo", "default": "Lucía & Daniel" },
+      { "type": "text", "id": "phrase", "label": "Frase de ejemplo", "default": "La noche en que todo empezó" },
+      { "type": "text", "id": "city", "label": "Ciudad", "default": "Madrid" },
+      { "type": "text", "id": "date", "label": "Fecha (AAAA-MM-DD)", "default": "2021-05-14" },
+      { "type": "text", "id": "time", "label": "Hora", "default": "23:41" },
+      { "type": "select", "id": "style", "label": "Estilo", "options": [{ "value": "noche", "label": "Noche" }, { "value": "marfil", "label": "Marfil" }], "default": "noche" },
+      { "type": "text", "id": "example_label", "label": "Pie", "default": "Ejemplo · Madrid · 14.05.2021" }
+    ]
+  }],
+  "presets": [{
+    "name": "FE · Historias",
+    "blocks": [
+      { "type": "story", "settings": { "kicker": "Pareja", "title": "La noche en que os conocisteis", "text": "Puede que no recordéis qué pedisteis. Las estrellas sí estaban ahí.", "names": "Lucía & Daniel", "phrase": "La noche en que todo empezó", "city": "Madrid", "date": "2021-05-14", "time": "23:41", "style": "noche", "example_label": "Ejemplo · Madrid · 14.05.2021" } },
+      { "type": "story", "settings": { "kicker": "Boda", "title": "El sí, bajo su propio cielo", "text": "Una boda dura un día. Su cielo puede quedarse en vuestra pared.", "names": "Marta & Javier", "phrase": "Sí, quiero", "city": "Sevilla", "date": "2025-06-21", "time": "22:30", "style": "marfil", "example_label": "Ejemplo · Sevilla · 21.06.2025" } },
+      { "type": "story", "settings": { "kicker": "Nacimiento", "title": "Su primera noche en el mundo", "text": "El cielo exacto que había cuando llegó, con su nombre y su hora.", "names": "Valeria", "phrase": "Bienvenida al mundo", "city": "Valencia", "date": "2026-02-03", "time": "04:12", "style": "noche", "example_label": "Ejemplo · Valencia · 03.02.2026" } },
+      { "type": "story", "settings": { "kicker": "Recuerdo", "title": "Para que no se olvide", "text": "Hay fechas que sostienen una vida entera. Guardad la suya.", "names": "Carmen & Ramón", "phrase": "Siempre", "city": "Bilbao", "date": "1968-09-14", "time": "21:00", "style": "marfil", "example_label": "Ejemplo · Bilbao · 14.09.1968" } }
+    ]
+  }]
+}
+{% endschema %}

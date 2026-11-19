@@ -1,0 +1,32 @@
+{%- capture fe_price -%}{% render 'fe-price', product: section.settings.product, fallback: section.settings.price_fallback %}{%- endcapture -%}
+<header class="fe-header" data-fe-header>
+  <a class="fe-logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, inicio">
+    {% render 'fe-icon', name: 'star' %}<span>{{ shop.name | escape }}</span>
+  </a>
+  <div class="fe-header__end">
+    <p class="fe-pill">{{ section.settings.price_prefix | escape }} <b>{{ fe_price }}</b> · {{ section.settings.shipping | escape }}</p>
+    <a class="fe-btn fe-btn--ghost fe-btn--sm" href="{{ section.settings.cta_link | default: '#crea' }}" data-magnetic><span class="fe-btn__label">{{ section.settings.cta_label | escape }}</span></a>
+    <a class="fe-cart" href="{{ routes.cart_url }}" aria-label="Cesta, {{ cart.item_count }} {% if cart.item_count == 1 %}artículo{% else %}artículos{% endif %}">
+      {% render 'fe-icon', name: 'cart' %}
+      {%- if cart.item_count > 0 %}<span class="fe-cart__n" aria-hidden="true">{{ cart.item_count }}</span>{% endif -%}
+    </a>
+  </div>
+</header>
+<div class="fe-buybar" role="region" aria-label="Comprar">
+  <p class="fe-buybar__price" style="margin:0"><strong>{{ section.settings.price_prefix | escape }} {{ fe_price }}</strong><span>{{ section.settings.shipping | escape }}</span></p>
+  <a class="fe-btn" href="{{ section.settings.cta_link | default: '#crea' }}"><span class="fe-btn__label">{{ section.settings.cta_label | escape }}</span></a>
+</div>
+{% schema %}
+{
+  "name": "FE · Cabecera",
+  "class": "fe-header-section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Producto (para el precio)" },
+    { "type": "text", "id": "price_fallback", "label": "Precio si el producto no está publicado", "default": "39,95 €" },
+    { "type": "text", "id": "price_prefix", "label": "Texto antes del precio", "default": "Desde" },
+    { "type": "text", "id": "shipping", "label": "Envío", "default": "Envío gratis a toda España" },
+    { "type": "text", "id": "cta_label", "label": "Botón", "default": "Crear mi mapa" },
+    { "type": "text", "id": "cta_link", "label": "Enlace del botón", "default": "#crea", "info": "Ancla a la sección del creador o URL del producto." }
+  ]
+}
+{% endschema %}

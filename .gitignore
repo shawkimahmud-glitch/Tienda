@@ -1,0 +1,6 @@
+node_modules/
+dist/
+film/out/
+.claude/skills/taste/assets/
+.claude/skills/impeccable/scripts/bin/
+*.log
