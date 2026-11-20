@@ -164,7 +164,7 @@ body.fe { margin: 0; background: var(--ink); color: var(--ivory); font: 400 1rem
 @media (min-width: 900px) { .sec { min-height: 100svh; display: grid; align-content: center; } }
 .sec__head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 20px 48px; margin-bottom: clamp(36px, 6vh, 64px); }
 [data-reveal] { transition: opacity 900ms var(--ease-out), filter 900ms var(--ease-out), transform 900ms var(--ease-out); }
-.fe-js [data-reveal]:not(.is-in) { opacity: 0; filter: blur(10px); transform: translate3d(0, 16px, 0); }
+.fe-js:not(.fe-reduced) [data-reveal]:not(.is-in) { opacity: 0; filter: blur(10px); transform: translate3d(0, 16px, 0); }
 .fe-reduced [data-reveal] { transition-duration: 1ms; transform: none !important; filter: none !important; }
 
 /* creator */

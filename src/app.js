@@ -170,7 +170,7 @@ function creator(sec) {
   };
   form.addEventListener('input', () => { raf ||= requestAnimationFrame(draw); });
   form.addEventListener('submit', (e) => e.preventDefault());
-  new IntersectionObserver(([e], o) => { if (e.isIntersecting) { draw(); o.disconnect(); } }, { rootMargin: '600px' }).observe(sec);
+  if (reduced) draw(); else new IntersectionObserver(([e], o) => { if (e.isIntersecting) { draw(); o.disconnect(); } }, { rootMargin: '600px' }).observe(sec);
 }
 
 // ---------- formats: total, buy link, honest urgency ----------
@@ -195,12 +195,9 @@ function formats(sec) {
 
 // ---------- small láminas ----------
 function minis() {
-  const io = new IntersectionObserver((es) => es.forEach((e) => {
-    if (!e.isIntersecting) return;
-    const d = e.target.dataset;
-    e.target.innerHTML = posterSVG({ names: d.names, phrase: d.phrase, cityName: d.city, date: d.date, time: d.time, style: d.style, id: 'm' + Math.random().toString(36).slice(2, 6) });
-    io.unobserve(e.target);
-  }), { rootMargin: '600px' });
+  const draw = (el) => { const d = el.dataset; el.innerHTML = posterSVG({ names: d.names, phrase: d.phrase, cityName: d.city, date: d.date, time: d.time, style: d.style, id: 'm' + Math.random().toString(36).slice(2, 6) }); };
+  if (reduced) return $$('[data-mini]').forEach(draw);
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { draw(e.target); io.unobserve(e.target); } }), { rootMargin: '600px' });
   $$('[data-mini]').forEach((el) => io.observe(el));
 }
 
@@ -262,6 +259,7 @@ function warp(cv) {
 
 // ---------- reveal headings on view (one grammar: blur + rise) ----------
 function reveals() {
+  if (reduced) { $$('[data-reveal]').forEach((el) => el.classList.add('is-in')); return; }
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } }), { threshold: 0.25 });
   $$('[data-reveal]').forEach((el) => io.observe(el));
 }
