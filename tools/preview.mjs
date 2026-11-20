@@ -40,7 +40,9 @@ let page = await engine.parseAndRender(readFileSync(`${T}/layout/${tpl.layout}.l
 const { build } = await import('esbuild');
 const vendor = { gsap: 'node_modules/gsap/index.js', scrolltrigger: 'node_modules/gsap/ScrollTrigger.js', lenis: 'node_modules/lenis/dist/lenis.mjs' };
 for (const [k, e] of Object.entries(vendor)) await build({ entryPoints: [e], bundle: true, minify: true, format: 'esm', outfile: `dist/vendor/${k}.mjs`, logLevel: 'error' });
-page = page.replaceAll('__CODE__', '/theme/assets/').replaceAll(/https:\/\/cdn\.jsdelivr\.net\/gh\/shawkimahmud-glitch\/tienda@[0-9a-f]+\/theme\/assets\//g, '/theme/assets/').replaceAll(/https:\/\/cdn\.jsdelivr\.net\/gh\/shawkimahmud-glitch\/tienda@[0-9a-f]+\/theme\/media\//g, '/theme/media/').replaceAll('https://cdn.jsdelivr.net/npm/three@0.170.0/', '/node_modules/three/').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm', '/dist/vendor/scrolltrigger.mjs').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm', '/dist/vendor/gsap.mjs').replaceAll('https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm', '/dist/vendor/lenis.mjs');
+const CDN = process.argv.includes('--cdn');
+if (CDN) page = page.replaceAll('__CODE__', '/theme/assets/').replace(/https:\/\/cdn\.jsdelivr\.net\/gh\/shawkimahmud-glitch\/tienda@[0-9a-f]+\/theme\/assets\//g, '/theme/assets/');
+else page = page.replaceAll('__CODE__', '/theme/assets/').replaceAll(/https:\/\/cdn\.jsdelivr\.net\/gh\/shawkimahmud-glitch\/tienda@[0-9a-f]+\/theme\/assets\//g, '/theme/assets/').replaceAll(/https:\/\/cdn\.jsdelivr\.net\/gh\/shawkimahmud-glitch\/tienda@[0-9a-f]+\/theme\/media\//g, '/theme/media/').replaceAll('https://cdn.jsdelivr.net/npm/three@0.170.0/', '/node_modules/three/').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm', '/dist/vendor/scrolltrigger.mjs').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm', '/dist/vendor/gsap.mjs').replaceAll('https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm', '/dist/vendor/lenis.mjs');
 mkdirSync('dist', { recursive: true });
-writeFileSync('dist/index.html', page);
+writeFileSync(CDN ? 'dist/cdn.html' : 'dist/index.html', page);
 console.log('dist/index.html', (page.length / 1024).toFixed(1) + ' KB');

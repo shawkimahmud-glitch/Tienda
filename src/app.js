@@ -72,6 +72,7 @@ function trip(sec) {
   const ex = JSON.parse(sec.dataset.example);
   $('[data-lam]', sec).innerHTML = posterSVG({ ...ex, city: undefined, cityName: ex.city, id: 'lam' });
   const beats = $$('[data-beat]', sec);
+  beats.forEach((b) => { b.inert = !b.hasAttribute('data-on'); });
   const portrait = innerHeight > innerWidth;
   const showStill = () => {
     sec.classList.add('is-still');
@@ -91,8 +92,10 @@ function trip(sec) {
     scene?.dispose(); scene = null; mode = 'frames'; sec.dataset.mode = mode;
     const url = portrait ? sec.dataset.framesM : sec.dataset.framesD;
     if (canvas.dataset.used) { const c = canvas.cloneNode(); canvas.replaceWith(c); canvas = c; }
-    player = new SequencePlayer(canvas);
-    const pack = new FramePack(url, { maxFrames: slow ? 24 : Infinity, onFrame: () => { player.last = null; dirty = true; } });
+    player = new SequencePlayer(canvas, { cache: portrait ? 10 : 14 });
+    player.onReady = () => { dirty = true; };
+    sec.__player = player;
+    const pack = new FramePack(url, { maxFrames: slow ? 24 : Infinity, onFrame: () => { dirty = true; } });
     player.setPack(pack);
     pack.load().catch(() => { if (!pack.loaded) showStill(); });
   };
@@ -106,14 +109,10 @@ function trip(sec) {
       scene.resize(stage.clientWidth, stage.clientHeight, dpr);
       await scene.ready;
       dirty = true;
-      // performance guard: if the GPU can't hold ~35 fps, fall back to the pre-rendered film
-      let n = 0, sum = 0, last = performance.now();
-      const probe = (now) => { sum += now - last; last = now; if (++n < 50) return requestAnimationFrame(probe); if (sum / n > 28 && force !== 'live') useFrames(); };
-      requestAnimationFrame(probe);
     } catch { useFrames(); }
   };
   const force = new URLSearchParams(location.search).get('fe');
-  const wantLive = force === 'live' || (force !== 'film' && !portrait && fine && innerWidth >= 900 && gl && !slow && (navigator.hardwareConcurrency || 8) >= 6);
+  const wantLive = force === 'live' || force === 'probe' || (force !== 'film' && !portrait && fine && innerWidth >= 900 && gl && !slow && (navigator.hardwareConcurrency || 8) >= 6);
   const start = () => (wantLive ? useLive() : useFrames());
   // first paint is the black field and the gold point (CSS); the 3D comes after load
   if (document.readyState === 'complete') setTimeout(start, 50); else addEventListener('load', () => setTimeout(start, 50), { once: true });
@@ -128,6 +127,8 @@ function trip(sec) {
     lam.style.setProperty('--lam-cy', ((P.cy * fh + (vh - fh) / 2) / vh).toFixed(4));
     lam.style.setProperty('--lam-cx', ((P.cx * fw + (vw - fw) / 2) / vw).toFixed(4));
   };
+  const point = $('.trip__point', sec), progress = $('.trip__progress i', sec), last = {};
+  let lastFrame = 0, idle = 0; const ft = [];
   const tick = (time) => {
     if (!visible) return;
     const d = target - p;
@@ -135,17 +136,29 @@ function trip(sec) {
     if (!dirty && p === target && mode !== 'live') return;
     dirty = false;
     if (mode === 'frames') { player.draw(p); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
-    if (mode === 'live' && scene) scene.frameAt(p, time / 1000);
-    stage.style.setProperty('--p', p.toFixed(4));
-    stage.style.setProperty('--point', (1 - clamp((p - 0.02) / 0.06)).toFixed(3));
+    if (mode === 'live' && scene) {
+      // continuous performance guard: if any stretch of ~90 frames averages under ~30 fps, switch to the film
+      const dt = time - lastFrame; lastFrame = time;
+      if (dt > 0 && dt < 3000 && force !== 'live') {
+        ft.push(dt); if (ft.length > 60) ft.shift();
+        const avg = (n) => ft.slice(-n).reduce((a, b) => a + b, 0) / n;
+        if ((ft.length >= 20 && avg(20) > 60) || (ft.length === 60 && avg(60) > 34)) { ft.length = 0; useFrames(); }
+      }
+      // at rest, render every other frame: the sun and the stars still breathe, the GPU rests
+      if (mode === 'live' && (p !== target || (idle++ & 1) === 0)) scene.frameAt(p, time / 1000);
+    }
+    // write each value on the element that uses it (a variable on the stage would restyle every child)
+    const pt = (1 - clamp((p - 0.02) / 0.06)).toFixed(3), bar = p.toFixed(4);
+    if (pt !== last.pt) { point.style.opacity = pt; point.style.visibility = pt === '0.000' ? 'hidden' : ''; last.pt = pt; }
+    if (bar !== last.bar && progress) { progress.style.transform = `scaleX(${bar})`; last.bar = bar; }
     const crisp = clamp((p - 0.965) / 0.03);
-    stage.style.setProperty('--crisp', crisp.toFixed(3));
+    const cr = crisp.toFixed(3);
+    if (cr !== last.cr) { lam.style.opacity = cr; last.cr = cr; }
     if (crisp > 0.98 !== lam.hasAttribute('data-live')) { lam.toggleAttribute('data-live', crisp > 0.98); if (crisp > 0.98) L.start(); }
     const pc = p * 100;
     for (const b of beats) {
       const on = pc >= +b.dataset.from && pc < +b.dataset.to;
-      if (on !== b.hasAttribute('data-on')) b.toggleAttribute('data-on', on);
-      b.inert = !on;
+      if (on !== b.hasAttribute('data-on')) { b.toggleAttribute('data-on', on); b.inert = !on; }
     }
   };
   gsap.ticker.add((t) => tick(t * 1000));
