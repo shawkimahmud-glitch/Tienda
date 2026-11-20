@@ -14,4 +14,5 @@ T.resize(W, H, 1);
 window.filmReady = T.ready.then(() => { T.frameAt(0, 0); return true; });
 window.renderFrame = (t) => { T.frameAt(t, t * 30); return new Promise((r) => requestAnimationFrame(() => r(true))); };
 window.grab = () => c.toDataURL('image/png');
+window.sunInfo = () => T.sun();
 </script></body></html>

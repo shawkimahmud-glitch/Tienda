@@ -3,12 +3,14 @@ import Lenis from 'lenis';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FramePack, SequencePlayer } from './sequence.js';
+import { sunOverlay } from './sunlive.js';
 import { posterSVG, CITIES, cityByName, fmtCoords, fmtDateDots } from './sky.js';
 
 gsap.registerPlugin(ScrollTrigger);
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const mq = (q) => matchMedia(q).matches;
 const root = document.documentElement;
 const reduced = mq('(prefers-reduced-motion: reduce)');
@@ -18,6 +20,12 @@ const slow = !!conn.saveData || /2g/.test(conn.effectiveType || '');
 root.classList.add('fe-js');
 if (reduced) root.classList.add('fe-reduced');
 window.__feBoot = true;
+// keep amounts and their units together: «4,95 €», «4–8 días», «30×40 cm», «23:41 h»
+const nb = (t) => t.replace(/(\d) (?=€|días|cm|h\b)/g, '$1\u00a0');
+{
+  const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n = tw.nextNode(); n; n = tw.nextNode()) if (/\d (€|días|cm|h\b)/.test(n.data)) n.data = nb(n.data);
+}
 
 // smooth scroll on wheel devices; native momentum on touch
 let lenis = null;
@@ -64,6 +72,71 @@ function lamina(el) {
   return { start() { if (!raf && !reduced) { t0 = performance.now(); raf = requestAnimationFrame(step); } } };
 }
 
+// ---------- stops: one gesture carries the film to the next stop ----------
+// Six resting points (the headline of each stretch fully on screen). Inside the journey a wheel
+// gesture, a swipe or a key press glides to the next stop in that direction; the rest of the page
+// scrolls normally. Momentum and scrollbar drags settle on the nearest stop ahead.
+const STOPS = [0, 0.27, 0.5, 0.68, 0.85, 1];
+function stops(sec) {
+  let busy = false, raf = 0, lastWheel = 0, lastAbs = 0, landed = 0, wheelDone = false, touch = null, lastY = scrollY, dir = 1, lastMove = 0;
+  const top = () => sec.getBoundingClientRect().top + scrollY;
+  const run = () => sec.offsetHeight - innerHeight;
+  const cur = () => clamp((scrollY - top()) / run());
+  const inside = () => { const r = sec.getBoundingClientRect(); return r.top <= 1 && r.bottom >= innerHeight - 1; };
+  const next = (d) => { const c = cur(); return d > 0 ? STOPS.find((s) => s > c + 0.012) : [...STOPS].reverse().find((s) => s < c - 0.012); };
+  const glide = (s) => {
+    const from = scrollY, to = Math.round(top() + s * run()), dist = Math.abs(to - from);
+    if (dist < 2) return;
+    const dur = Math.min(1700, 700 + (dist / innerHeight) * 520);
+    busy = true;
+    const done = () => { busy = false; lastMove = landed = performance.now(); };
+    if (lenis) { lenis.scrollTo(to, { duration: dur / 1000, easing: eio, lock: true, force: true, onComplete: done }); return; }
+    const t0 = performance.now();
+    cancelAnimationFrame(raf);
+    const step = (now) => { const k = clamp((now - t0) / dur); scrollTo(0, from + (to - from) * eio(k)); if (k < 1) raf = requestAnimationFrame(step); else done(); };
+    raf = requestAnimationFrame(step);
+  };
+  const go = (d) => { const s = next(d); if (s == null) return false; glide(s); return true; };
+
+  // wheel / trackpad: one gesture = one stop; its inertia tail is swallowed
+  addEventListener('wheel', (e) => {
+    if (e.ctrlKey || !inside()) return;
+    const d = Math.sign(e.deltaY); if (!d) return;
+    // a new gesture is a real pause, or a fresh push (the delta rises instead of decaying like an inertia tail)
+    const now = performance.now(), gap = now - lastWheel, abs = Math.abs(e.deltaY);
+    // (a long pause only counts once the last flick had died down, or between mouse-wheel notches,
+    //  so a stall in the middle of an inertia tail does not fire a second stop)
+    const fresh = (gap > 600 && (lastAbs < 8 || (abs >= 50 && lastAbs >= 50))) || gap > 1400 || (gap > 160 && abs > lastAbs * 1.15) || (abs > lastAbs * 2 && abs > 14);
+    lastWheel = now; lastAbs = abs;
+    if (fresh && !busy && now - landed > 250) wheelDone = false; // a pause, once the glide has landed, starts a new gesture
+    if (!busy && !wheelDone && next(d) == null) return; // at an end: the page carries on
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (!busy && !wheelDone) { wheelDone = go(d); }
+  }, { passive: false, capture: true });
+
+  // touch: a vertical swipe inside the journey moves one stop; horizontal drags (the lámina) pass
+  addEventListener('touchstart', (e) => { touch = e.touches.length === 1 ? { x: e.touches[0].clientX, y: e.touches[0].clientY, done: false, free: false } : null; }, { passive: true });
+  addEventListener('touchmove', (e) => {
+    if (!touch || touch.free || !inside()) return;
+    const dy = touch.y - e.touches[0].clientY, dx = touch.x - e.touches[0].clientX;
+    if (!touch.done && !busy && Math.abs(dy) > 2 && next(Math.sign(dy)) == null) { touch.free = true; return; } // at an end: native scroll
+    if (e.cancelable) e.preventDefault();
+    if (!touch.done && !busy && Math.abs(dy) > 28 && Math.abs(dy) > Math.abs(dx) * 1.2) touch.done = go(Math.sign(dy));
+  }, { passive: false });
+  addEventListener('touchend', () => { touch = null; }, { passive: true });
+
+  // keys, scrollbar, momentum: settle on the next stop in the direction of travel
+  addEventListener('scroll', () => { const y = scrollY; if (y !== lastY) { dir = Math.sign(y - lastY); lastY = y; lastMove = performance.now(); } }, { passive: true });
+  const settle = () => {
+    requestAnimationFrame(settle);
+    if (busy || touch || performance.now() - lastMove < 170 || performance.now() - lastWheel < 200 || !inside()) return;
+    const c = cur();
+    if (STOPS.some((s) => Math.abs(s - c) < 0.006)) return;
+    const s = next(dir) ?? next(-dir); if (s != null) glide(s);
+  };
+  requestAnimationFrame(settle);
+}
+
 // ---------- the journey ----------
 function trip(sec) {
   const stage = $('.trip__stage', sec);
@@ -83,7 +156,7 @@ function trip(sec) {
   if (reduced || !gl && !window.createImageBitmap) return showStill();
 
   const L = lamina(lam);
-  let target = 0, p = 0, dirty = true, visible = true, mode = null, player = null, scene = null;
+  let target = 0, p = 0, dirty = true, visible = true, mode = null, player = null, scene = null, sunLive = null;
   ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: (s) => { target = s.progress; dirty = true; } });
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(sec);
 
@@ -98,6 +171,8 @@ function trip(sec) {
     const pack = new FramePack(url, { maxFrames: slow ? 24 : Infinity, onFrame: () => { dirty = true; } });
     player.setPack(pack);
     pack.load().catch(() => { if (!pack.loaded) showStill(); });
+    // the frames hold the film; a tiny live layer keeps the sun's surface boiling while you rest on it
+    if (!slow && !sunLive) sunLive = sunOverlay(stage, canvas, sec.dataset.media + (portrait ? 'fe-sun-m.json' : 'fe-sun-d.json'));
   };
   const useLive = async () => {
     mode = 'live'; sec.dataset.mode = mode;
@@ -135,7 +210,7 @@ function trip(sec) {
     p = Math.abs(d) < 0.0002 ? target : p + d * (fine ? 0.14 : 0.2);
     if (!dirty && p === target && mode !== 'live') return;
     dirty = false;
-    if (mode === 'frames') { player.draw(p); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
+    if (mode === 'frames') { player.draw(p); sunLive?.update(p, player.pack); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
     if (mode === 'live' && scene) {
       // continuous performance guard: if any stretch of ~90 frames averages under ~30 fps, switch to the film
       const dt = time - lastFrame; lastFrame = time;
@@ -162,6 +237,7 @@ function trip(sec) {
     }
   };
   gsap.ticker.add((t) => tick(t * 1000));
+  stops(sec);
   new ResizeObserver(() => { player?.resize(); if (mode === 'frames') fitLam(); scene?.resize(stage.clientWidth, stage.clientHeight, Math.min(devicePixelRatio || 1, 1.5)); dirty = true; }).observe(stage);
 }
 
@@ -179,7 +255,7 @@ function creator(sec) {
     Object.assign(state, { names: f.names.value.trim(), phrase: f.phrase.value.trim(), city: f.city.value, date: f.date.value || '2021-05-14', time: f.time.value || '22:00', style: form.querySelector('[name=style]:checked')?.value || 'noche' });
     prev.innerHTML = posterSVG({ ...state, names: state.names || 'Vuestros nombres', cityName: state.city, id: 'cp' });
     const c = cityByName(state.city);
-    coords.textContent = `${c[0]} · ${fmtCoords(c[1], c[2])} · ${fmtDateDots(state.date)} · ${state.time} h`;
+    coords.textContent = nb(`${c[0]} · ${fmtCoords(c[1], c[2])} · ${fmtDateDots(state.date)} · ${state.time} h`);
   };
   form.addEventListener('input', () => { raf ||= requestAnimationFrame(draw); });
   form.addEventListener('submit', (e) => e.preventDefault());
@@ -192,7 +268,7 @@ function formats(sec) {
   const upd = () => {
     const r = $('input[name=format]:checked', sec);
     if (!r) return;
-    total.textContent = r.dataset.price;
+    total.textContent = nb(r.dataset.price);
     const u = new URL(sec.dataset.base, location.href);
     if (r.value) u.searchParams.set('variant', r.value);
     buy.href = u.pathname + u.search;

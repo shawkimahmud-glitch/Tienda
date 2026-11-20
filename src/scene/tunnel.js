@@ -9,6 +9,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { computeSky, cityByName, tzFor, POSTER, starRadius } from '../sky.js';
+import { SUN_SURFACE, SUN_CORONA } from './sun-glsl.js';
 
 export const BEATS = [0, 0.12, 0.38, 0.54, 0.74, 0.88, 1];
 const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
@@ -75,13 +76,15 @@ export function createTunnel(o) {
       float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }
       void main(){ vec3 c=texture2D(tDiffuse,vUv).rgb;
         if(uAmt>0.001){ vec2 dir=vec2(0.5)-uSun; vec3 f=vec3(0.);
+          float gh=smoothstep(0.06,0.3,length(dir*vec2(uAspect,1.)));
           f+=vec3(1.,.72,.38)*disk(vUv,uSun+dir*0.45,0.05)*0.18;
           f+=vec3(.55,.7,1.)*disk(vUv,uSun+dir*0.9,0.025)*0.35;
           f+=vec3(1.,.8,.5)*ring(vUv,uSun+dir*1.25,0.11,0.006)*0.22;
           f+=vec3(.6,.75,1.)*disk(vUv,uSun+dir*1.6,0.07)*0.12;
           f+=vec3(1.,.85,.6)*disk(vUv,uSun+dir*2.0,0.018)*0.4;
+          f*=gh;
           float sy=abs(vUv.y-uSun.y); float sx=abs(vUv.x-uSun.x)*uAspect;
-          f+=vec3(.7,.8,1.)*exp(-sy*220.)*exp(-sx*1.6)*0.55;
+          f+=vec3(.75,.82,1.)*exp(-sy*260.)*exp(-sx*1.8)*0.36;
           c+=f*uAmt; }
         vec2 q=vUv-0.5; q.x*=uAspect; c*=mix(1., smoothstep(1.15,0.25,length(q)), uVig);
         c+=(h(vUv*vec2(1733.,977.)+uTime)-0.5)*uGrain;
@@ -187,15 +190,10 @@ export function createTunnel(o) {
   // ---- the sun ----
   const SUN = v3(0, 0, -330), SUN_R = 34;
   const sunMat = new THREE.ShaderMaterial({
-    uniforms: { uT: { value: 0 }, uHeat: { value: 1 } },
+    uniforms: { uT: { value: 0 }, uHeat: { value: 1 }, uDetail: { value: 1 } },
     vertexShader: 'varying vec3 vP; varying vec3 vN; void main(){ vP=position; vN=normalize(normalMatrix*normal); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }',
-    fragmentShader: noise + `varying vec3 vP; varying vec3 vN; uniform float uT; uniform float uHeat;
-      void main(){ vec3 p=normalize(vP)*2.4; vec3 w=vec3(fbm(p+uT*.04),fbm(p+vec3(5.2,1.3,2.)-uT*.03),fbm(p+vec3(2.,7.,4.)))*1.2;
-        float n=fbm(p*1.6+w+uT*.02)*.5+.5; float cell=snoise(normalize(vP)*38.+uT*.1)*.5+.5;
-        float h=n*.8+cell*.3;
-        vec3 c=mix(vec3(.7,.16,.02),vec3(1.,.5,.1),smoothstep(.3,.6,h)); c=mix(c,vec3(1.,.92,.68),smoothstep(.62,.9,h));
-        float mu=max(dot(normalize(vN),vec3(0.,0.,1.)),0.); c*=.45+.8*pow(mu,.5);
-        gl_FragColor=vec4(c*0.95*uHeat,1.); }`,
+    fragmentShader: noise + SUN_SURFACE + `varying vec3 vP; varying vec3 vN; uniform float uT; uniform float uHeat; uniform float uDetail;
+      void main(){ float mu=clamp(dot(normalize(vN),vec3(0.,0.,1.)),0.,1.); gl_FragColor=vec4(sunSurface(normalize(vP),mu,uT,uDetail)*uHeat,1.); }`,
   });
   const sun = new THREE.Mesh(new THREE.SphereGeometry(SUN_R, 128, 64), sunMat);
   sun.position.copy(SUN);
@@ -208,11 +206,8 @@ export function createTunnel(o) {
     }));
     m.renderOrder = 3; scene.add(m); return m;
   };
-  const corona = billboard(SUN_R * 7, `varying vec2 vUv; uniform float uT; uniform float uA;
-    void main(){ vec2 p=vUv*2.-1.; float r=length(p); float a=atan(p.y,p.x);
-      float rays=(snoise(vec3(cos(a)*2.5,sin(a)*2.5,uT*.05))*.5+.5)*(snoise(vec3(cos(a)*9.,sin(a)*9.,uT*.08+4.))*.5+.5);
-      float g=exp(-max(r-.29,0.)*8.)*.8+pow(max(0.,1.-r),3.)*rays*1.4; g*=1.-smoothstep(.31,.27,r)*.7;
-      gl_FragColor=vec4(mix(vec3(1.,.45,.12),vec3(1.,.82,.52),exp(-r*4.))*g*uA,1.); }`);
+  const corona = billboard(SUN_R * 7, SUN_CORONA + `varying vec2 vUv; uniform float uT; uniform float uA;
+    void main(){ vec2 p=(vUv*2.-1.)*3.5; gl_FragColor=vec4(sunCorona(p,uT)*smoothstep(3.5,2.7,length(p))*uA,1.); }`);
   corona.position.copy(SUN);
   // the single point of light (the sun, before it wakes)
   const spark = billboard(14, `varying vec2 vUv; uniform float uA;
@@ -378,6 +373,7 @@ export function createTunnel(o) {
   };
   const tmp = v3(0, 0, 0);
   const sunScreen = new THREE.Vector3();
+  const sunInfo = { x: 0.5, y: 0.5, r: 0, T: 0, vis: 0 };
   let last = 0;
 
   function frameAt(t, time = 0) {
@@ -409,10 +405,11 @@ export function createTunnel(o) {
     const sScale = Math.max(0.001, 0.02 + 0.98 * eout(ign));
     sun.scale.setScalar(sScale); corona.scale.setScalar(Math.max(0.001, sScale));
     const flash = bump(t, 0.4, 0.425, 0.47);
-    sunMat.uniforms.uHeat.value = 0.75 + 0.7 * flash;
-    sunMat.uniforms.uT.value = time * 0.3 + t * 40;
-    corona.material.uniforms.uA.value = 0.35 + 0.7 * flash;
-    corona.material.uniforms.uT.value = time * 0.3 + t * 40;
+    const sunT = time * 1.4 + t * 30;
+    sunMat.uniforms.uHeat.value = 0.92 + 0.6 * flash;
+    sunMat.uniforms.uT.value = sunT;
+    corona.material.uniforms.uA.value = 0.55 + 0.6 * flash;
+    corona.material.uniforms.uT.value = sunT;
     spark.material.uniforms.uA.value = (0.7 + 0.3 * ss(seg(t, 0, 0.1))) * (1 - ss(seg(t, 0.4, 0.45)));
     bloom.strength = 0.7 + 0.9 * flash;
     bloom.threshold = 0.72 - 0.25 * flash;
@@ -424,6 +421,10 @@ export function createTunnel(o) {
     flare.uniforms.uSun.value.set(sunScreen.x * 0.5 + 0.5, sunScreen.y * 0.5 + 0.5);
     flare.uniforms.uAmt.value = vis * ss(seg(t, 0.42, 0.5)) * (1 - ss(seg(t, 0.6, 0.68))) * 0.9;
     flare.uniforms.uTime.value = high ? 0 : time;
+    // where the sun sits on screen (the film overlay keeps it alive on top of the frames)
+    const sd = camera.position.distanceTo(SUN), sR = SUN_R * sScale, sr = sR / (2 * Math.sqrt(Math.max(sd * sd - sR * sR, 1e-6)) * Math.tan((camera.fov * Math.PI) / 360)); // silhouette of a sphere seen up close
+    sunMat.uniforms.uDetail.value = clamp((sr * H * 2 - 60) / 200) * (high ? 1 : 0.6); // live has no film bloom to soften it
+    sunInfo.x = sunScreen.x * 0.5 + 0.5; sunInfo.y = 0.5 - sunScreen.y * 0.5; sunInfo.r = sr; sunInfo.T = sunT; sunInfo.vis = vis && sunScreen.z < 1 ? 1 : 0;
 
     // 4 Earth (born when the sun has had its moment)
     earth.visible = atmo.visible = beacon.visible = t > 0.5;
@@ -466,5 +467,5 @@ export function createTunnel(o) {
     if (high) { flare.uniforms.uGrain.value = 0.012; }
     return true;
   });
-  return { frameAt, resize, ready, renderer, dispose: () => renderer.dispose() };
+  return { frameAt, resize, ready, renderer, sun: () => ({ ...sunInfo }), dispose: () => renderer.dispose() };
 }
