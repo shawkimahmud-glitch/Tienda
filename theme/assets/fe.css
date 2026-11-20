@@ -277,3 +277,5 @@ select.input option { background: var(--night); }
 @media (prefers-reduced-motion: reduce) {
   .beat .hl > *, .beat__aside, .panel { transition: opacity 200ms ease !important; filter: none !important; transform: none !important; }
 }
+
+@media (max-width: 899px) { .beat[data-from="0"] .beat__aside p { display: none; } }
