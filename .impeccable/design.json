@@ -1,1 +1,55 @@
-{"world":"tunel-de-estrellas","colors":{"ink":"#05070D","night":"#0B1426","gold":"#D4AF63","ivory":"#F3EBD8","blue":"#A9C2EE","onBlue":"#05070D","glass":"rgba(255,255,255,0.06)","glassLine":"rgba(255,255,255,0.12)"},"fonts":{"sans":"Inter Tight","serif":"Instrument Serif"},"type":{"hl":"clamp(2.45rem,6.2vw,6rem)/0.98 · 300 · -0.035em","hlMd":"clamp(2.2rem,4.6vw,4.4rem)","body":"1rem/1.55"},"radius":{"pill":"999px","panel":"18px","input":"14px","card":"22px","moment":"26px","stage":"28px"},"glass":{"blur":"18px","saturate":"140%"},"motion":{"easeOut":"cubic-bezier(0.23,1,0.32,1)","easeInOut":"cubic-bezier(0.77,0,0.175,1)","headlineIn":"900ms","headlineOut":"360ms","press":"160ms","hover":"200ms"},"lamina":{"mobile":{"h":0.5,"cy":0.42,"cx":0.5},"desktop":{"h":0.62,"cy":0.47,"cx":0.64}}}
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20T02:00:00Z",
+  "title": "Design System: Fecha Estelar",
+  "extensions": {
+    "colorMeta": {
+      "space-black": { "role": "neutral", "displayName": "Negro espacial", "canonical": "#05070D" },
+      "night-blue": { "role": "neutral", "displayName": "Azul noche", "canonical": "#0B1426" },
+      "starlight-gold": { "role": "secondary", "displayName": "Oro de luz estelar", "canonical": "#D4AF63" },
+      "ivory": { "role": "neutral", "displayName": "Marfil", "canonical": "#F3EBD8" },
+      "pale-blue": { "role": "primary", "displayName": "Azul pálido de acción", "canonical": "#A9C2EE", "tonalRamp": ["#A9C2EE", "#C3D5F5"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Primera línea de cada titular del viaje y del cierre." },
+      "display-italic": { "displayName": "Display cursiva", "purpose": "Segunda línea de cada titular." },
+      "headline": { "displayName": "Headline", "purpose": "Titulares de sección." },
+      "price": { "displayName": "Precio", "purpose": "Precios de formato y total." }
+    },
+    "shadows": [
+      { "name": "lamina", "value": "0 40px 70px -30px rgba(0,0,0,.95), 0 12px 24px -12px rgba(0,0,0,.7)", "purpose": "La lámina final y la del creador." },
+      { "name": "mini-lamina", "value": "0 30px 50px -24px rgba(0,0,0,.9)", "purpose": "Láminas de ejemplo en los momentos." }
+    ],
+    "motion": [
+      { "name": "ease-out", "value": "cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Entradas y estados de interfaz." },
+      { "name": "ease-in-out", "value": "cubic-bezier(0.77, 0, 0.175, 1)", "purpose": "Movimiento en pantalla." },
+      { "name": "headline-in", "value": "900ms ease-out, blur 12px→0, rise .18em, 2ª línea +90ms", "purpose": "Titular de cada tramo." },
+      { "name": "headline-out", "value": "360ms", "purpose": "Salida más rápida que la entrada." },
+      { "name": "press", "value": "scale(.97) 160ms", "purpose": "Feedback de botones." },
+      { "name": "tilt-spring", "value": "k 170, d 18", "purpose": "Tarjetas de momentos." },
+      { "name": "lamina-spring", "value": "k 120, d 14", "purpose": "Lámina final que gira con el dedo." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "max-width: 899px" },
+      { "name": "fmt-2col", "value": "720px" },
+      { "name": "fmt-4col", "value": "1100px" }
+    ]
+  },
+  "components": [
+    { "name": "Primary Button", "kind": "button", "refersTo": "button-primary", "description": "La única acción: crear o comprar.", "html": "<a class=\"ds-btn\">Crear mi lámina →</a>", "css": ".ds-btn{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:999px;background:#A9C2EE;color:#05070D;font:500 .98rem/1 'Inter Tight',system-ui,sans-serif;text-decoration:none;transition:background-color .2s ease,transform .16s cubic-bezier(.23,1,.32,1)}.ds-btn:hover{background:#C3D5F5}.ds-btn:active{transform:scale(.97)}" },
+    { "name": "Glass Panel", "kind": "card", "refersTo": "glass-panel", "description": "Dos líneas de dato sobre la película.", "html": "<div class=\"ds-panel\"><b>Fecha · Lugar · Hora</b><span>14.05.2021 · Madrid · 23:41</span></div>", "css": ".ds-panel{width:290px;padding:16px 20px 18px;border-radius:18px;background:rgba(255,255,255,.06);backdrop-filter:blur(18px) saturate(140%);border:1px solid rgba(255,255,255,.12);color:#F3EBD8;font-family:'Inter Tight',sans-serif}.ds-panel b{display:block;font-weight:500}.ds-panel span{display:block;margin-top:4px;color:rgba(243,235,216,.74);font-size:.9rem}" },
+    { "name": "Nav Pills", "kind": "nav", "refersTo": "nav-pill-active", "description": "Menú en cápsula de cristal.", "html": "<nav class=\"ds-pills\"><a aria-current=\"true\">Diseñar</a><a>Formatos</a><a>Preguntas</a></nav>", "css": ".ds-pills{display:inline-flex;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12)}.ds-pills a{min-height:36px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;color:#F3EBD8;font:.92rem 'Inter Tight',sans-serif}.ds-pills a[aria-current=true]{background:#F3EBD8;color:#05070D}" }
+  ],
+  "narrative": {
+    "northStar": "La noche exacta",
+    "overview": "Una sola toma de cine que el visitante conduce con el scroll y que acaba convertida en un objeto para la pared. Espacio casi negro y casi monocromo; el oro existe solo como luz. Precisión de cartógrafo con emoción de cine.",
+    "keyCharacteristics": ["Fondo #05070D y #0B1426, texto marfil", "Oro solo como luz o estado", "Titulares sans 300 + serif cursiva", "Cristal 6 %, blur 18px, borde 12 %", "Un solo botón azul pálido"],
+    "rules": [
+      { "name": "The Gold Is Light Rule", "body": "El oro nunca rellena una superficie ni un botón.", "section": "colors" },
+      { "name": "The One Button Rule", "body": "Un solo estilo de botón de acción.", "section": "colors" },
+      { "name": "The Two Lines Rule", "body": "Todo titular son dos líneas: sans 300 y serif cursiva.", "section": "typography" }
+    ],
+    "dos": ["Do escribir titulares en dos líneas", "Do usar el oro solo como luz", "Do mantener precio y envío visibles", "Do calcular cada lámina de ejemplo con datos reales"],
+    "donts": ["Don't añadir otro estilo de botón", "Don't inventar reseñas ni cifras", "Don't poner etiquetas sobre titulares", "Don't usar ease-in en interfaz"]
+  }
+}

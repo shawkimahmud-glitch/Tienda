@@ -216,7 +216,26 @@ function minis() {
 
 // ---------- cards that lean toward the pointer (spring), fine pointers only ----------
 function tilt() {
-  if (!fine || reduced) return;
+  if (reduced) return;
+  if (!fine) {
+    // touch: in the swipe carousel each card leans by how far it sits from the centre of the screen
+    $$('.moments').forEach((row) => {
+      const cards = $$('[data-tilt]', row);
+      let raf = 0;
+      const lean = () => {
+        raf = 0;
+        const mid = innerWidth / 2;
+        for (const c of cards) {
+          const r = c.getBoundingClientRect();
+          const k = clamp(((r.left + r.width / 2) - mid) / innerWidth, -1, 1);
+          c.style.transform = `rotateY(${(-k * 16).toFixed(2)}deg) scale(${(1 - Math.abs(k) * 0.05).toFixed(3)})`;
+        }
+      };
+      row.addEventListener('scroll', () => { raf ||= requestAnimationFrame(lean); }, { passive: true });
+      lean();
+    });
+    return;
+  }
   $$('[data-tilt]').forEach((el) => {
     let rx = 0, ry = 0, vx = 0, vy = 0, tx = 0, ty = 0, raf = 0, t0 = 0;
     const step = (now) => {
