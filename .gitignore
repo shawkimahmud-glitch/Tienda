@@ -5,3 +5,4 @@ film/out/
 .claude/skills/impeccable/scripts/bin/
 *.log
 .taste-skill/
+.claude/settings.local.json
