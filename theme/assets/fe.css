@@ -279,3 +279,10 @@ select.input option { background: var(--night); }
 }
 
 @media (max-width: 899px) { .beat[data-from="0"] .beat__aside p { display: none; } }
+
+.fe p { text-wrap: pretty; }
+
+.make__lede { margin: 22px 0 36px; }
+.make__set { border: 0; margin: 6px 0 0; padding: 0; display: grid; gap: 10px; }
+.make__legend { padding: 0; margin-bottom: 10px; }
+.make__go { margin-top: 10px; }

@@ -15,7 +15,7 @@
       </div>
       <div>
         <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ s.line1 | escape }}</span><em>{{ s.line2 | escape }}</em></h2>
-        <p class="lede" style="margin:22px 0 36px">{{ s.text | escape }}</p>
+        <p class="lede make__lede">{{ s.text | escape }}</p>
         {%- if has_app -%}
           {%- for block in section.blocks -%}{%- if block.type == '@app' %}{% render block %}{% endif -%}{%- endfor -%}
         {%- else -%}
@@ -28,12 +28,12 @@
               <label class="field"><span>{{ s.l_date | escape }}</span><input class="input" type="date" name="date" value="{{ s.d_date }}" min="1900-01-01" max="2100-12-31"></label>
               <label class="field"><span>{{ s.l_time | escape }}</span><input class="input" type="time" name="time" value="{{ s.d_time }}"></label>
             </div>
-            <fieldset style="border:0;margin:6px 0 0;padding:0;display:grid;gap:10px">
-              <legend class="note" style="padding:0;margin-bottom:10px">{{ s.l_style | escape }}</legend>
+            <fieldset class="make__set">
+              <legend class="note make__legend">{{ s.l_style | escape }}</legend>
               <div class="seg glass"><label><input type="radio" name="style" value="noche" checked>Noche</label><label><input type="radio" name="style" value="marfil">Marfil</label></div>
             </fieldset>
             <p class="note" data-coords></p>
-            <div style="margin-top:10px"><a class="btn btn--lg" href="#formatos" data-magnetic>{{ s.button | escape }}{% render 'fe-icon', name: 'arrow' %}</a></div>
+            <div class="make__go"><a class="btn btn--lg" href="#formatos" data-magnetic>{{ s.button | escape }}{% render 'fe-icon', name: 'arrow' %}</a></div>
           </form>
         {%- endif -%}
       </div>
