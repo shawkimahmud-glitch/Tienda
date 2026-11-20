@@ -32,8 +32,9 @@
     </style>
     {{ 'fe.css' | asset_url | stylesheet_tag }}
     <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/","gsap":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm","gsap/ScrollTrigger":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm","lenis":"https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm"}}</script>
-    <link rel="modulepreload" href="{{ 'fe-app.js' | asset_url }}">
-    <script type="module" src="{{ 'fe-app.js' | asset_url }}"></script>
+    {%- capture code -%}{% render 'fe-code' %}{%- endcapture -%}
+    <link rel="modulepreload" href="{{ code }}fe-app.js" crossorigin>
+    <script type="module" src="{{ code }}fe-app.js" crossorigin></script>
     {{ content_for_header }}
   </head>
   <body class="fe" data-media="{{ media }}">

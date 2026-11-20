@@ -17,7 +17,7 @@
 <section class="trip" data-trip data-frames-m="{{ frames_m }}" data-frames-d="{{ frames_d }}" data-media="{{ media }}" data-example="{{ example | escape }}" aria-label="{{ s.aria | escape }}">
   <div class="trip__stage">
     <canvas class="trip__film" aria-hidden="true"></canvas>
-    <img class="trip__still" data-src-m="{{ media }}fe-still-m.webp" data-src-d="{{ media }}fe-still-d.webp" alt="{{ s.still_alt | escape }}" decoding="async">
+    <img class="trip__still" src="{{ media }}fe-still-d.webp" loading="lazy" width="1600" height="900" data-src-m="{{ media }}fe-still-m.webp" data-src-d="{{ media }}fe-still-d.webp" alt="{{ s.still_alt | escape }}" decoding="async">
     <div class="trip__point" aria-hidden="true"></div>
     <div class="trip__shade" aria-hidden="true"></div>
     <div class="lam" aria-hidden="true"><div class="lam__card"><div data-lam></div></div></div>

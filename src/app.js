@@ -88,7 +88,7 @@ function trip(sec) {
 
   const useFrames = () => {
     if (mode === 'frames') return;
-    scene?.dispose(); scene = null; mode = 'frames';
+    scene?.dispose(); scene = null; mode = 'frames'; sec.dataset.mode = mode;
     const url = portrait ? sec.dataset.framesM : sec.dataset.framesD;
     if (canvas.dataset.used) { const c = canvas.cloneNode(); canvas.replaceWith(c); canvas = c; }
     player = new SequencePlayer(canvas);
@@ -97,7 +97,7 @@ function trip(sec) {
     pack.load().catch(() => { if (!pack.loaded) showStill(); });
   };
   const useLive = async () => {
-    mode = 'live';
+    mode = 'live'; sec.dataset.mode = mode;
     try {
       const { createTunnel } = await import('./scene/tunnel.js');
       canvas.dataset.used = '1';
@@ -108,11 +108,12 @@ function trip(sec) {
       dirty = true;
       // performance guard: if the GPU can't hold ~35 fps, fall back to the pre-rendered film
       let n = 0, sum = 0, last = performance.now();
-      const probe = (now) => { sum += now - last; last = now; if (++n < 50) return requestAnimationFrame(probe); if (sum / n > 28) useFrames(); };
+      const probe = (now) => { sum += now - last; last = now; if (++n < 50) return requestAnimationFrame(probe); if (sum / n > 28 && force !== 'live') useFrames(); };
       requestAnimationFrame(probe);
     } catch { useFrames(); }
   };
-  const wantLive = !portrait && fine && innerWidth >= 900 && gl && !slow && (navigator.hardwareConcurrency || 8) >= 6;
+  const force = new URLSearchParams(location.search).get('fe');
+  const wantLive = force === 'live' || (force !== 'film' && !portrait && fine && innerWidth >= 900 && gl && !slow && (navigator.hardwareConcurrency || 8) >= 6);
   const start = () => (wantLive ? useLive() : useFrames());
   // first paint is the black field and the gold point (CSS); the 3D comes after load
   if (document.readyState === 'complete') setTimeout(start, 50); else addEventListener('load', () => setTimeout(start, 50), { once: true });
