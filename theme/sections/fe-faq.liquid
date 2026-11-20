@@ -1,14 +1,14 @@
-<section class="fe-sec fe-sec--night fe-faq" aria-labelledby="fe-faq-{{ section.id }}">
-  <div class="fe-wrap fe-faq__grid">
+<section id="preguntas" class="sec" aria-labelledby="h-{{ section.id }}">
+  <div class="wrap faq">
     <div>
-      <h2 id="fe-faq-{{ section.id }}" class="fe-h2" data-reveal="words">{{ section.settings.heading | escape }}</h2>
-      <p class="fe-lede">{{ section.settings.text | escape }}</p>
+      <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ section.settings.line1 | escape }}</span><em>{{ section.settings.line2 | escape }}</em></h2>
+      <p class="lede" style="margin-top:22px">{{ section.settings.text | escape }}</p>
     </div>
     <div>
       {%- for block in section.blocks -%}
-        <details class="fe-qa" {{ block.shopify_attributes }}>
+        <details class="qa" {{ block.shopify_attributes }}>
           <summary>{{ block.settings.q | escape }}<i aria-hidden="true"></i></summary>
-          <div class="fe-qa__a">{{ block.settings.a }}</div>
+          <div class="qa__a">{{ block.settings.a }}</div>
         </details>
       {%- endfor -%}
     </div>
@@ -18,25 +18,14 @@
 {
   "name": "FE · Preguntas",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Titular", "default": "Lo que nos preguntáis" },
-    { "type": "textarea", "id": "text", "label": "Texto", "default": "¿Algo más? Escribidnos a [EMAIL DE CONTACTO] y os respondemos." }
+    { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Lo que" },
+    { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "nos preguntáis." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "¿Otra duda? Escríbenos a [EMAIL DE CONTACTO]." }
   ],
-  "blocks": [{ "type": "qa", "name": "Pregunta", "settings": [
+  "blocks": [{ "type": "qa", "name": "Pregunta", "limit": 5, "settings": [
     { "type": "text", "id": "q", "label": "Pregunta", "default": "¿El cielo es real?" },
     { "type": "richtext", "id": "a", "label": "Respuesta", "default": "<p>Sí.</p>" }
   ] }],
-  "presets": [{
-    "name": "FE · Preguntas",
-    "blocks": [
-      { "type": "qa", "settings": { "q": "¿El cielo de la lámina es real?", "a": "<p>Sí. Calculamos la posición de las estrellas visibles desde vuestra ciudad en la fecha y la hora que elijáis, a partir de catálogos astronómicos (Hipparcos y Yale Bright Star). Las líneas doradas unen las constelaciones que había sobre vosotros.</p>" } },
-      { "type": "qa", "settings": { "q": "¿Y si no sabemos la hora exacta?", "a": "<p>Dejad la que mejor recordéis. Si no la sabéis, usamos las 22:00. El cielo cambia con las horas, así que cuanto más precisa, más fiel será.</p>" } },
-      { "type": "qa", "settings": { "q": "¿Qué formatos y precios hay?", "a": "<p>Lámina A4 (21×30 cm): 39,95 €. Lámina 30×40 cm: 44,95 €. Lámina 30×40 cm con marco de roble: 79,95 €. El envío está incluido.</p>" } },
-      { "type": "qa", "settings": { "q": "¿Cuánto cuesta el envío y cuánto tarda?", "a": "<p>El envío es gratis a toda España. Plazo de entrega: [PLAZO DE ENTREGA].</p>" } },
-      { "type": "qa", "settings": { "q": "¿Llega a tiempo para Navidad?", "a": "<p>Sí, si hacéis el pedido antes del [FECHA LÍMITE NAVIDAD].</p>" } },
-      { "type": "qa", "settings": { "q": "¿Tengo que crear una cuenta?", "a": "<p>No. Podéis comprar como invitados, solo con un correo para enviaros la confirmación y el seguimiento.</p>" } },
-      { "type": "qa", "settings": { "q": "¿Puedo ver la lámina antes de pagar?", "a": "<p>Sí. La vista previa se actualiza mientras escribís y la confirmáis antes de pagar.</p>" } },
-      { "type": "qa", "settings": { "q": "¿Puedo devolverla?", "a": "<p>Al ser un producto personalizado, no tiene derecho de desistimiento (art. 103 del TRLGDCU). Si llega dañada o con un error nuestro, escribidnos: [POLÍTICA DE REPOSICIÓN].</p>" } }
-    ]
-  }]
+  "presets": [{ "name": "FE · Preguntas" }]
 }
 {% endschema %}

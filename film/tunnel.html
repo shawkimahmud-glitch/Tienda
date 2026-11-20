@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Túnel de estrellas · render</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+import { createTunnel } from '/src/scene/tunnel.js';
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const c = document.getElementById('c'); c.style.width = W + 'px'; c.style.height = H + 'px';
+const portrait = H > W;
+const T = createTunnel({ canvas: c, media: '/theme/media/', quality: q.get('q') || 'high', example: { names: 'Lucía & Daniel', phrase: 'La noche en que todo empezó', city: 'Madrid', date: '2021-05-14', time: '23:41' }, poster: portrait ? { h: 0.5, cy: 0.42 } : { h: 0.62, cy: 0.47, cx: 0.64 } });
+T.resize(W, H, 1);
+window.filmReady = T.ready.then(() => { T.frameAt(0, 0); return true; });
+window.renderFrame = (t) => { T.frameAt(t, t * 30); return new Promise((r) => requestAnimationFrame(() => r(true))); };
+window.grab = () => c.toDataURL('image/png');
+</script></body></html>

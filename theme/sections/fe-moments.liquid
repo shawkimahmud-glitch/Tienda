@@ -1,0 +1,48 @@
+<section class="sec" aria-labelledby="h-{{ section.id }}">
+  <div class="wrap">
+    <div class="sec__head">
+      <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ section.settings.line1 | escape }}</span><em>{{ section.settings.line2 | escape }}</em></h2>
+      <p class="lede">{{ section.settings.text | escape }}</p>
+    </div>
+    <div class="moments">
+      {%- for block in section.blocks -%}
+        {%- assign b = block.settings -%}
+        <a class="moment glass" href="{{ b.link }}" data-tilt {{ block.shopify_attributes }}>
+          <div class="moment__img">
+            {%- if b.image != blank -%}
+              {{ b.image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '400, 600, 900', sizes: '(min-width: 900px) 30vw, 82vw', alt: b.image.alt }}
+            {%- else -%}
+              <div data-mini data-names="{{ b.names | escape }}" data-phrase="{{ b.phrase | escape }}" data-city="{{ b.city | escape }}" data-date="{{ b.date | escape }}" data-time="{{ b.time | escape }}" data-style="{{ b.style }}" role="img" aria-label="Lámina de ejemplo: {{ b.city | escape }}, {{ b.date | escape }}"></div>
+            {%- endif -%}
+          </div>
+          <h3>{{ b.title1 | escape }} <em>{{ b.title2 | escape }}</em></h3>
+          <p>{{ b.text | escape }}</p>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FE · Momentos",
+  "settings": [
+    { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Tres noches" },
+    { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "que merecen su cielo." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Láminas de ejemplo, calculadas con su fecha y su ciudad reales." }
+  ],
+  "blocks": [{ "type": "moment", "name": "Momento", "limit": 3, "settings": [
+    { "type": "text", "id": "title1", "label": "Título", "default": "El" },
+    { "type": "text", "id": "title2", "label": "Título (cursiva)", "default": "aniversario" },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "La noche en que empezó todo, en vuestra pared." },
+    { "type": "text", "id": "link", "label": "Enlace", "default": "#crea" },
+    { "type": "image_picker", "id": "image", "label": "Foto (opcional)" },
+    { "type": "text", "id": "names", "label": "Nombres de ejemplo", "default": "Lucía & Daniel" },
+    { "type": "text", "id": "phrase", "label": "Frase de ejemplo", "default": "La noche en que todo empezó" },
+    { "type": "text", "id": "city", "label": "Ciudad", "default": "Madrid" },
+    { "type": "text", "id": "date", "label": "Fecha (AAAA-MM-DD)", "default": "2021-05-14" },
+    { "type": "text", "id": "time", "label": "Hora", "default": "23:41" },
+    { "type": "select", "id": "style", "label": "Estilo", "options": [{ "value": "noche", "label": "Noche" }, { "value": "marfil", "label": "Marfil" }], "default": "noche" }
+  ] }],
+  "presets": [{ "name": "FE · Momentos" }]
+}
+{% endschema %}

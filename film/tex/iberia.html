@@ -1,0 +1,23 @@
+<!doctype html><meta charset="utf-8"><script src="/node_modules/topojson-client/dist/topojson-client.min.js"></script>
+<script type="module">
+const LON0 = -10.5, LON1 = 4.5, LAT0 = 35.2, LAT1 = 44.2;
+const [land, cities] = await Promise.all([fetch('/node_modules/world-atlas/land-10m.json').then((r) => r.json()), fetch('/node_modules/cities.json/cities.json').then((r) => r.json())]);
+const DW = 3072, DH = Math.round(DW * ((LAT1 - LAT0) / (LON1 - LON0)) / Math.cos(40 * Math.PI / 180));
+const P = (lo, la) => [((lo - LON0) / (LON1 - LON0)) * DW, ((LAT1 - la) / (LAT1 - LAT0)) * DH];
+const c = document.createElement('canvas'); c.width = DW; c.height = DH; const x = c.getContext('2d');
+x.fillStyle = '#000'; x.fillRect(0, 0, DW, DH);
+// faint land so the coast reads at night (green channel), lights in red channel
+const f = topojson.feature(land, land.objects.land);
+const geoms = f.features ? f.features.map((g) => g.geometry) : [f.geometry];
+x.fillStyle = 'rgb(0,255,0)'; x.beginPath();
+for (const g of geoms) for (const poly of (g.type === 'MultiPolygon' ? g.coordinates : [g.coordinates])) for (const ring of poly) ring.forEach(([lo, la], i) => { const [a, b] = P(lo, la); i ? x.lineTo(a, b) : x.moveTo(a, b); });
+x.fill('evenodd');
+const L = document.createElement('canvas'); L.width = DW; L.height = DH; const l = L.getContext('2d');
+l.fillStyle = '#000'; l.fillRect(0, 0, DW, DH); l.globalCompositeOperation = 'lighter';
+for (const ci of cities) { const lo = +ci.lng, la = +ci.lat; if (lo < LON0 - 1 || lo > LON1 + 1 || la < LAT0 - 1 || la > LAT1 + 1) continue; const [a, b] = P(lo, la); l.fillStyle = 'rgba(255,0,0,0.55)'; l.fillRect(a - 1.5, b - 1.5, 3, 3); }
+for (const [la, lo, r] of [[40.42, -3.70, 46], [41.39, 2.17, 34], [39.47, -0.38, 24], [37.39, -5.99, 22], [41.65, -0.88, 16], [36.72, -4.42, 18], [43.26, -2.93, 16], [38.71, -9.14, 26], [41.15, -8.61, 18]]) { const [a, b] = P(lo, la); const g = l.createRadialGradient(a, b, 0, a, b, r); g.addColorStop(0, 'rgba(255,0,0,0.9)'); g.addColorStop(1, 'rgba(255,0,0,0)'); l.fillStyle = g; l.fillRect(a - r, b - r, 2 * r, 2 * r); }
+const G = document.createElement('canvas'); G.width = DW; G.height = DH; const gc = G.getContext('2d'); gc.filter = 'blur(3px)'; gc.drawImage(L, 0, 0);
+l.globalAlpha = 0.8; l.drawImage(G, 0, 0);
+x.globalCompositeOperation = 'lighter'; x.drawImage(L, 0, 0);
+window.out = c.toDataURL('image/png'); window.dims = [DW, DH];
+</script>

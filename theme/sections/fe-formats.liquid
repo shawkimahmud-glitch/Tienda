@@ -1,0 +1,88 @@
+{%- liquid
+  assign s = section.settings
+  assign p = s.product
+  if p == blank
+    assign p = all_products['mapa-estelar-personalizado-el-cielo-de-vuestra-noche']
+  endif
+  assign base = '/products/mapa-estelar-personalizado-el-cielo-de-vuestra-noche'
+  if p != blank
+    assign base = p.url
+  endif
+-%}
+<section id="formatos" class="sec" data-formats data-base="{{ base }}" data-deadline="{{ s.deadline | escape }}" aria-labelledby="h-{{ section.id }}">
+  <div class="wrap">
+    <div class="sec__head">
+      <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ s.line1 | escape }}</span><em>{{ s.line2 | escape }}</em></h2>
+      <p class="lede">{{ s.text | escape }}</p>
+    </div>
+    <fieldset style="border:0;margin:0;padding:0">
+      <legend class="sr">{{ s.legend | escape }}</legend>
+      <div class="fmts">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign b = block.settings
+            assign vid = ''
+            assign key = b.match | downcase
+            if p != blank and key != blank
+              for v in p.variants
+                assign vt = v.title | downcase
+                if vt contains key
+                  assign vid = v.id
+                  break
+                endif
+              endfor
+            endif
+          -%}
+          <label class="fmt glass" {{ block.shopify_attributes }}>
+            <input type="radio" name="format" value="{{ vid }}" data-price="{{ b.price | escape }}" data-title="{{ b.title | escape }}"{% if b.default %} checked{% endif %}>
+            {%- if b.tag != blank %}<span class="fmt__tag">{{ b.tag | escape }}</span>{% else %}<span class="fmt__tag fmt__tag--ghost" aria-hidden="true">·</span>{% endif -%}
+            <span class="fmt__t">{{ b.title | escape }}</span>
+            <span class="fmt__m">{{ b.meta | escape }}</span>
+            <span class="fmt__p">{{ b.price | escape }}</span>
+            <span class="fmt__dot" aria-hidden="true"></span>
+          </label>
+        {%- endfor -%}
+      </div>
+    </fieldset>
+    <div class="buy">
+      <div class="buy__total"><span class="note">{{ s.total_label | escape }}</span><strong data-total>{{ s.total_default | escape }}</strong></div>
+      <ul class="facts">
+        <li>{% render 'fe-icon', name: 'truck' %}{{ s.fact1 | escape }}</li>
+        <li>{% render 'fe-icon', name: 'clock' %}{{ s.fact2 | escape }}</li>
+        <li>{% render 'fe-icon', name: 'user' %}{{ s.fact3 | escape }}</li>
+      </ul>
+      <a class="btn btn--lg" href="{{ base }}" data-buy data-magnetic>{{ s.button | escape }}{% render 'fe-icon', name: 'arrow' %}</a>
+    </div>
+    <p class="urge" data-urge data-before="{{ s.urge_before | escape }}" data-after="{{ s.urge_after | escape }}">{{ s.urge_before | replace: '[FECHA]', s.deadline | escape }}</p>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FE · Formatos",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Producto" },
+    { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Cuatro formatos," },
+    { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "el mismo cielo." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Enmarcada, en papel o en digital. Envío gratis a toda España." },
+    { "type": "text", "id": "legend", "label": "Etiqueta accesible", "default": "Formato" },
+    { "type": "text", "id": "total_label", "label": "Etiqueta total", "default": "Total" },
+    { "type": "text", "id": "total_default", "label": "Total inicial", "default": "44,95 €" },
+    { "type": "text", "id": "fact1", "label": "Dato 1", "default": "Envío gratis en España" },
+    { "type": "text", "id": "fact2", "label": "Dato 2", "default": "Entrega en 4–8 días laborables" },
+    { "type": "text", "id": "fact3", "label": "Dato 3", "default": "Sin crear cuenta" },
+    { "type": "text", "id": "button", "label": "Botón", "default": "Crear mi lámina" },
+    { "type": "text", "id": "deadline", "label": "Fecha límite de Navidad (AAAA-MM-DD)", "default": "[FECHA LÍMITE NAVIDAD]", "info": "Con una fecha válida, el aviso cambia solo cuando pasa." },
+    { "type": "text", "id": "urge_before", "label": "Aviso antes de la fecha ([FECHA] = la fecha)", "default": "Pide antes del [FECHA] y llega para Navidad." },
+    { "type": "text", "id": "urge_after", "label": "Aviso pasada la fecha", "default": "¿Llegas tarde? Regálala en digital en 5 minutos." }
+  ],
+  "blocks": [{ "type": "format", "name": "Formato", "limit": 6, "settings": [
+    { "type": "text", "id": "title", "label": "Nombre", "default": "Lámina 30×40 cm" },
+    { "type": "text", "id": "meta", "label": "Detalle", "default": "Papel, sin marco" },
+    { "type": "text", "id": "price", "label": "Precio", "default": "44,95 €" },
+    { "type": "text", "id": "tag", "label": "Etiqueta" },
+    { "type": "text", "id": "match", "label": "Palabra para encontrar la variante", "info": "Parte del nombre de la variante en Shopify, p. ej. «marco», «30×40», «A4», «Digital»." },
+    { "type": "checkbox", "id": "default", "label": "Marcado por defecto", "default": false }
+  ] }],
+  "presets": [{ "name": "FE · Formatos" }]
+}
+{% endschema %}

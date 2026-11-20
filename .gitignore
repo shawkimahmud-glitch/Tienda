@@ -4,3 +4,4 @@ film/out/
 .claude/skills/taste/assets/
 .claude/skills/impeccable/scripts/bin/
 *.log
+.taste-skill/

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ request.locale.iso_code }}">
+<html lang="{{ request.locale.iso_code }}" data-type="product">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -21,39 +21,25 @@
       })(document);
     </script>
     <script nomodule>document.documentElement.classList.remove('fe-js');</script>
-    {%- liquid
-      assign serif = settings.type_heading_font
-      assign sans = settings.type_body_font
-      assign serif_400 = serif | font_modify: 'weight', '400'
-      assign serif_500 = serif | font_modify: 'weight', '500'
-      assign serif_i = serif_400 | font_modify: 'style', 'italic'
-      assign sans_400 = sans | font_modify: 'weight', '400'
-      assign sans_500 = sans | font_modify: 'weight', '500'
-      assign sans_600 = sans | font_modify: 'weight', '600'
-      assign sans_700 = sans | font_modify: 'weight', '700'
-    -%}
-    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
-    {%- if serif_400 %}<link rel="preload" as="font" href="{{ serif_400 | font_url }}" type="font/woff2" crossorigin>{% endif %}
+    {%- capture media -%}{% render 'fe-media' %}{%- endcapture -%}
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ media }}fonts/inter-tight-latin.woff2">
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="{{ media }}fonts/instrument-serif-400-italic-latin.woff2">
     <style>
-      {{ serif_400 | font_face: font_display: 'swap' }}
-      {{ serif_500 | font_face: font_display: 'swap' }}
-      {{ serif_i | font_face: font_display: 'swap' }}
-      {{ sans_400 | font_face: font_display: 'swap' }}
-      {{ sans_500 | font_face: font_display: 'swap' }}
-      {{ sans_600 | font_face: font_display: 'swap' }}
-      {{ sans_700 | font_face: font_display: 'swap' }}
+      @font-face { font-family: 'Inter Tight'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('{{ media }}fonts/inter-tight-latin.woff2') format('woff2'); }
+      @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url('{{ media }}fonts/instrument-serif-400-italic-latin.woff2') format('woff2'); }
+      @font-face { font-family: 'Instrument Serif'; font-style: normal; font-weight: 400; font-display: swap; src: url('{{ media }}fonts/instrument-serif-400-latin.woff2') format('woff2'); }
     </style>
     {{ 'fe.css' | asset_url | stylesheet_tag }}
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-    <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","gsap":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm","gsap/ScrollTrigger":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm","lenis":"https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm"}}</script>
+    <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/","gsap":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm","gsap/ScrollTrigger":"https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm","lenis":"https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm"}}</script>
     <link rel="modulepreload" href="{{ 'fe-app.js' | asset_url }}">
     <script type="module" src="{{ 'fe-app.js' | asset_url }}"></script>
     {{ content_for_header }}
   </head>
-  <body class="fe-body">
-    <a class="fe-skip" href="#fe-main">Saltar al contenido</a>
+  <body class="fe" data-media="{{ media }}">
+    <a class="skip" href="#fe-main">Saltar al contenido</a>
     {% section 'fe-header' %}
-    <main id="fe-main" role="main" tabindex="-1">
+    <main id="fe-main" tabindex="-1">
       {{ content_for_layout }}
     </main>
     {% section 'fe-footer' %}

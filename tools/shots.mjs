@@ -19,13 +19,13 @@ for (const name of which === 'both' ? ['mobile', 'desktop'] : [which]) {
   await page.waitForTimeout(1200);
   if (!opt.sections || opt.p) {
     for (const p of ps) {
-      await page.evaluate((p) => { const j = document.querySelector('.fe-journey'); const top = j.offsetTop + (j.offsetHeight - innerHeight) * p; window.scrollTo(0, top); }, p);
+      await page.evaluate((p) => { const j = document.querySelector('.trip'); const top = j.offsetTop + (j.offsetHeight - innerHeight) * p; window.scrollTo(0, top); }, p);
       await page.waitForTimeout(p > 0.6 ? 1600 : 900);
       await page.screenshot({ path: `${out}/${name}-j${String(Math.round(p * 100)).padStart(3, '0')}.png` });
     }
   }
   if (opt.sections) {
-    for (const sel of ['.fe-instant', '#crea', '.fe-ribbon', '.fe-stories', '.fe-steps', '.fe-faq', '.fe-finale', '.fe-footer']) {
+    for (const sel of ['#crea', '#formatos', '.moments', '.promise', '#preguntas', '.close', '.foot']) {
       const ok = await page.evaluate((sel) => { const el = document.querySelector(sel); if (!el) return false; window.scrollTo(0, el.getBoundingClientRect().top + scrollY - (sel === '.fe-ribbon' ? 200 : 0)); return true; }, sel);
       if (!ok) continue;
       await page.waitForTimeout(1500);

@@ -1,0 +1,19 @@
+<section class="close" aria-labelledby="h-{{ section.id }}">
+  <canvas data-warp aria-hidden="true"></canvas>
+  <div class="wrap close__in">
+    <h2 id="h-{{ section.id }}" class="hl" data-reveal><span>{{ section.settings.line1 | escape }}</span><em>{{ section.settings.line2 | escape }}</em></h2>
+    <a class="btn btn--lg" href="{{ section.settings.link }}" data-magnetic>{{ section.settings.button | escape }}{% render 'fe-icon', name: 'arrow' %}</a>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FE · Cierre",
+  "settings": [
+    { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Volved a esa noche." },
+    { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "Esta vez, para siempre." },
+    { "type": "text", "id": "button", "label": "Botón", "default": "Crear mi lámina" },
+    { "type": "text", "id": "link", "label": "Enlace", "default": "#crea" }
+  ],
+  "presets": [{ "name": "FE · Cierre" }]
+}
+{% endschema %}

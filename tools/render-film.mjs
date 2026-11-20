@@ -10,7 +10,7 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('console', (m) => m.type() === 'error' && console.log('console:', m.text()));
 page.on('pageerror', (e) => console.log('pageerror:', e.message));
-await page.goto(`http://localhost:4173/film/?w=${W}&h=${H}`);
+await page.goto(`http://localhost:4173/film/${args.page || ''}?w=${W}&h=${H}`);
 await page.waitForFunction(() => window.filmReady, null, { timeout: 120000 });
 await page.evaluate(() => window.filmReady);
 const ts = args.only ? args.only.split(',').map(Number) : Array.from({ length: N }, (_, i) => i / (N - 1));

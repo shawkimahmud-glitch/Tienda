@@ -17,6 +17,7 @@ async function renderSection(type, id, conf = {}) {
   for (const s of schema.settings || []) if ('default' in s) settings[s.id] = s.default;
   Object.assign(settings, conf.settings || {});
   const defs = Object.fromEntries((schema.blocks || []).map((b) => [b.type, b]));
+  if (!conf.block_order && schema.default?.blocks) { conf = { ...conf, blocks: Object.fromEntries(schema.default.blocks.map((b, i) => ['d' + i, b])), block_order: schema.default.blocks.map((_, i) => 'd' + i) }; }
   const blocks = (conf.block_order || []).map((bid) => {
     const b = conf.blocks[bid], st = {};
     for (const s of defs[b.type]?.settings || []) if ('default' in s) st[s.id] = s.default;
@@ -39,11 +40,7 @@ let page = await engine.parseAndRender(readFileSync(`${T}/layout/${tpl.layout}.l
 const { build } = await import('esbuild');
 const vendor = { gsap: 'node_modules/gsap/index.js', scrolltrigger: 'node_modules/gsap/ScrollTrigger.js', lenis: 'node_modules/lenis/dist/lenis.mjs' };
 for (const [k, e] of Object.entries(vendor)) await build({ entryPoints: [e], bundle: true, minify: true, format: 'esm', outfile: `dist/vendor/${k}.mjs`, logLevel: 'error' });
-page = page.replaceAll('https://cdn.jsdelivr.net/npm/three@0.170.0/', '/node_modules/three/').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm', '/dist/vendor/scrolltrigger.mjs').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm', '/dist/vendor/gsap.mjs').replaceAll('https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm', '/dist/vendor/lenis.mjs');
-const ff = (fam, file, w, st) => `@font-face{font-family:'${fam}';src:url(${file}) format('woff2');font-weight:${w};font-style:${st};font-display:swap}`;
-const B = '/node_modules/@fontsource/bodoni-moda/files/bodoni-moda-latin-', M = '/node_modules/@fontsource/manrope/files/manrope-latin-';
-const faces = [ff('Bodoni Moda', B + '400-normal.woff2', 400, 'normal'), ff('Bodoni Moda', B + '500-normal.woff2', 500, 'normal'), ff('Bodoni Moda', B + '400-italic.woff2', 400, 'italic'), ...[400, 500, 600, 700].map((w) => ff('Manrope', `${M}${w}-normal.woff2`, w, 'normal'))].join('');
-page = page.replace('</head>', `<link rel="preload" as="font" type="font/woff2" crossorigin href="${B}400-normal.woff2"><style>${faces}</style></head>`);
+page = page.replaceAll('__MEDIA__', '/theme/media/').replaceAll('https://cdn.jsdelivr.net/npm/three@0.170.0/', '/node_modules/three/').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/ScrollTrigger.js/+esm', '/dist/vendor/scrolltrigger.mjs').replaceAll('https://cdn.jsdelivr.net/npm/gsap@3.12.5/+esm', '/dist/vendor/gsap.mjs').replaceAll('https://cdn.jsdelivr.net/npm/lenis@1.1.13/+esm', '/dist/vendor/lenis.mjs');
 mkdirSync('dist', { recursive: true });
 writeFileSync('dist/index.html', page);
 console.log('dist/index.html', (page.length / 1024).toFixed(1) + ' KB');

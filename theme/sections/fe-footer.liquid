@@ -1,32 +1,30 @@
-<footer class="fe-footer">
-  <div class="fe-wrap">
-    <div class="fe-footer__top">
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot__top">
       <div>
-        <a class="fe-logo" href="{{ routes.root_url }}">{% render 'fe-icon', name: 'star' %}<span>{{ shop.name | escape }}</span></a>
-        <p class="fe-footer__claim">{{ section.settings.claim | escape }}</p>
+        <a class="logo" href="{{ routes.root_url }}">{% render 'fe-icon', name: 'star' %}<i>Fecha</i><b>Estelar</b></a>
+        <p class="foot__claim">{{ section.settings.claim | escape }}</p>
       </div>
-      <nav aria-labelledby="fe-f1"><h2 id="fe-f1">{{ section.settings.menu_title | escape }}</h2>
+      <nav aria-labelledby="f1-{{ section.id }}"><h2 id="f1-{{ section.id }}">{{ section.settings.menu_title | escape }}</h2>
         <ul>
           {%- if section.settings.menu != blank -%}
-            {%- for link in section.settings.menu.links -%}<li><a class="fe-link" href="{{ link.url }}">{{ link.title | escape }}</a></li>{%- endfor -%}
+            {%- for link in section.settings.menu.links -%}<li><a class="link" href="{{ link.url }}">{{ link.title | escape }}</a></li>{%- endfor -%}
           {%- else -%}
-            <li><a class="fe-link" href="{{ routes.root_url }}#crea">Crear mi mapa</a></li>
-            <li><a class="fe-link" href="{{ routes.cart_url }}">Cesta</a></li>
+            <li><a class="link" href="{{ routes.root_url }}#crea">Crear mi lámina</a></li>
+            <li><a class="link" href="{{ routes.root_url }}#formatos">Formatos y precios</a></li>
+            <li><a class="link" href="{{ routes.cart_url }}">Cesta</a></li>
           {%- endif -%}
         </ul>
       </nav>
-      <nav aria-labelledby="fe-f2"><h2 id="fe-f2">{{ section.settings.legal_title | escape }}</h2>
+      <nav aria-labelledby="f2-{{ section.id }}"><h2 id="f2-{{ section.id }}">{{ section.settings.legal_title | escape }}</h2>
         <ul>
-          {%- if section.settings.legal_menu != blank -%}
-            {%- for link in section.settings.legal_menu.links -%}<li><a class="fe-link" href="{{ link.url }}">{{ link.title | escape }}</a></li>{%- endfor -%}
-          {%- else -%}
-            {%- for policy in shop.policies -%}<li><a class="fe-link" href="{{ policy.url }}">{{ policy.title | escape }}</a></li>{%- endfor -%}
-          {%- endif -%}
+          {%- for policy in shop.policies -%}<li><a class="link" href="{{ policy.url }}">{{ policy.title | escape }}</a></li>{%- endfor -%}
+          <li><span>{{ section.settings.contact | escape }}</span></li>
         </ul>
       </nav>
     </div>
-    <div class="fe-footer__legal">
-      <p>© {{ 'now' | date: '%Y' }} {{ section.settings.company | escape }} · {{ section.settings.tax_id | escape }}</p>
+    <div class="foot__legal">
+      <p>© {{ 'now' | date: '%Y' }} {{ section.settings.company | escape }} · NIF {{ section.settings.tax_id | escape }}</p>
       <p>{{ section.settings.credits | escape }}</p>
     </div>
   </div>
@@ -38,11 +36,11 @@
     { "type": "text", "id": "claim", "label": "Frase", "default": "Para las noches que no queréis olvidar." },
     { "type": "text", "id": "menu_title", "label": "Título menú", "default": "Tienda" },
     { "type": "link_list", "id": "menu", "label": "Menú" },
-    { "type": "text", "id": "legal_title", "label": "Título legal", "default": "Legal" },
-    { "type": "link_list", "id": "legal_menu", "label": "Menú legal", "info": "Si está vacío, se muestran las políticas de la tienda." },
+    { "type": "text", "id": "legal_title", "label": "Título legal", "default": "Legal y contacto" },
+    { "type": "text", "id": "contact", "label": "Contacto", "default": "[EMAIL DE CONTACTO]" },
     { "type": "text", "id": "company", "label": "Razón social", "default": "[RAZÓN SOCIAL]" },
-    { "type": "text", "id": "tax_id", "label": "NIF", "default": "NIF [NIF]" },
-    { "type": "text", "id": "credits", "label": "Créditos", "default": "Datos estelares: d3-celestial (BSD) · Ciudades: GeoNames (CC BY 4.0)" }
+    { "type": "text", "id": "tax_id", "label": "NIF", "default": "[NIF]" },
+    { "type": "text", "id": "credits", "label": "Créditos", "default": "Estrellas: d3-celestial (BSD) · Tierra: NASA Blue Marble y Black Marble · Ciudades: GeoNames (CC BY 4.0)" }
   ]
 }
 {% endschema %}

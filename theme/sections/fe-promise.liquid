@@ -1,0 +1,26 @@
+<section class="sec" aria-labelledby="h-{{ section.id }}">
+  <div class="wrap promise">
+    <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ section.settings.line1 | escape }}</span><em>{{ section.settings.line2 | escape }}</em></h2>
+    <div class="promise__card glass" data-reveal>
+      {% render 'fe-icon', name: 'shield' %}
+      <p class="lede" style="color:var(--ivory)">{{ section.settings.text | escape }}</p>
+      <ul class="facts">
+        <li>{% render 'fe-icon', name: 'truck' %}{{ section.settings.fact1 | escape }}</li>
+        <li>{% render 'fe-icon', name: 'clock' %}{{ section.settings.fact2 | escape }}</li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "FE · Garantía",
+  "settings": [
+    { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Si llega dañada o con un error nuestro," },
+    { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "te enviamos otra gratis." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Escríbenos a [EMAIL DE CONTACTO] con una foto y la reponemos sin coste." },
+    { "type": "text", "id": "fact1", "label": "Dato 1", "default": "Envío gratis en España" },
+    { "type": "text", "id": "fact2", "label": "Dato 2", "default": "Entrega en 4–8 días laborables" }
+  ],
+  "presets": [{ "name": "FE · Garantía" }]
+}
+{% endschema %}

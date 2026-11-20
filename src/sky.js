@@ -117,11 +117,11 @@ export function posterSVG(o) {
 <g clip-path="url(#${id}c)"><path class="fe-poster-lines" d="${lines}" fill="none" stroke="${c.line}" stroke-width=".42" stroke-linecap="round"/>
 <g class="fe-poster-stars" fill="${c.ink}">${stars}</g></g>
 <g text-anchor="middle">
-<text x="150" y="${P.namesY}" font-family="'Bodoni Moda',Didot,serif" font-size="23" fill="${c.ink}" letter-spacing=".2">${esc(o.names)}</text>
-<text x="150" y="${P.phraseY}" font-family="'Bodoni Moda',Didot,serif" font-style="italic" font-size="9.4" fill="${c.gold}">${esc(o.phrase)}</text>
+<text x="150" y="${P.namesY}" font-family="'Instrument Serif',Georgia,serif" font-size="25" fill="${c.ink}" letter-spacing=".2">${esc(o.names)}</text>
+<text x="150" y="${P.phraseY}" font-family="'Instrument Serif',Georgia,serif" font-style="italic" font-size="10.5" fill="${c.gold}">${esc(o.phrase)}</text>
 <path d="M128 ${P.lineY}H172" stroke="${c.gold}" stroke-width=".4"/>
-<text x="150" y="${P.cityY}" font-family="Manrope,system-ui,sans-serif" font-size="6.6" font-weight="600" letter-spacing="2.6" fill="${c.ink}">${esc(city[0].toUpperCase())}</text>
-<text x="150" y="${P.dateY}" font-family="Manrope,system-ui,sans-serif" font-size="6" letter-spacing="1.8" fill="${c.sub}">${fmtDateDots(o.date)} · ${esc(o.time)} H</text>
-<text x="150" y="${P.coordY}" font-family="Manrope,system-ui,sans-serif" font-size="5.6" letter-spacing="1.4" fill="${c.sub}">${fmtCoords(lat, lon)}</text>
+<text x="150" y="${P.cityY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="6.6" font-weight="600" letter-spacing="2.6" fill="${c.ink}">${esc(city[0].toUpperCase())}</text>
+<text x="150" y="${P.dateY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="6" letter-spacing="1.8" fill="${c.sub}">${fmtDateDots(o.date)} · ${esc(o.time)} H</text>
+<text x="150" y="${P.coordY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="5.6" letter-spacing="1.4" fill="${c.sub}">${fmtCoords(lat, lon)}</text>
 </g></svg>`;
 }
