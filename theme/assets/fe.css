@@ -111,13 +111,12 @@ body.fe { margin: 0; background: var(--ink); color: var(--ivory); font: 400 1rem
 .trip { position: relative; background: #000; }
 .trip__stage { position: relative; height: 100svh; overflow: hidden; isolation: isolate; }
 .trip__film { position: absolute; inset: 0; width: 100%; height: 100%; }
-.trip__film { opacity: 0; }
 .trip__sun { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; }
-.trip__hero { position: absolute; inset: 0; z-index: 1; background: #000; }
-.trip__hero img, .trip__star { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.trip__star { opacity: 0; transition: opacity 700ms var(--ease-out); touch-action: pan-y; }
-.trip.has-star .trip__star { opacity: 1; }
-.trip__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(5, 7, 13, 0.45) 0%, transparent 18%, transparent 55%, rgba(5, 7, 13, 0.72) 100%); }
+.trip .trip__still { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+.trip__point { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px; border-radius: 50%; background: #fff3dc; box-shadow: 0 0 10px 3px rgba(255, 214, 150, 0.85), 0 0 46px 14px rgba(212, 175, 99, 0.28); pointer-events: none; }
+@media (prefers-reduced-motion: no-preference) { .trip__point { animation: breathe 4s var(--ease-in-out) infinite; } }
+@keyframes breathe { 50% { transform: scale(1.6); opacity: 0.75; } }
+.trip__shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(5, 7, 13, 0.45) 0%, transparent 18%, transparent 55%, rgba(5, 7, 13, 0.72) 100%); }
 
 /* beats: headline bottom-left; enter with blur, leave faster */
 .beat { position: absolute; left: var(--gutter); right: var(--gutter); bottom: calc(var(--bar) + clamp(28px, 9vh, 96px)); pointer-events: none; }
@@ -143,11 +142,21 @@ body.fe { margin: 0; background: var(--ink); color: var(--ivory); font: 400 1rem
 @media (max-width: 899px) { .panel--a { top: calc(var(--head) + 6vh); } .panel--b { bottom: auto; top: calc(var(--head) + 6vh + 104px); } }
 
 /* the lámina that stays: floats in 3D, turns with the finger */
+.lam { position: absolute; z-index: 1; left: calc(var(--lam-cx) * 100%); top: calc(var(--lam-cy) * 100%); height: calc(var(--lam-h) * 100%); aspect-ratio: 3 / 4; transform: translate(-50%, -50%); perspective: 1200px; opacity: 0; pointer-events: none; --lam-h: 0.62; --lam-cy: 0.47; --lam-cx: 0.64; }
+@media (max-aspect-ratio: 4/5) { .lam { --lam-h: 0.5; --lam-cy: 0.42; --lam-cx: 0.5; } }
+.lam[data-live] { pointer-events: auto; cursor: grab; touch-action: pan-y; }
+.lam[data-live]:active { cursor: grabbing; }
+.lam__card { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; will-change: transform; }
+.lam__card > div, .lam__card svg { width: 100%; height: 100%; }
+.lam__card::after { content: ''; position: absolute; inset: 0; box-shadow: 0 40px 70px -30px rgba(0, 0, 0, 0.95), 0 12px 24px -12px rgba(0, 0, 0, 0.7); pointer-events: none; }
+.lam__card::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(115deg, rgba(255, 255, 255, 0.12), transparent 38%, transparent 62%, rgba(255, 255, 255, 0.05)); background-size: 220% 100%; background-position: calc(50% + var(--sheen, 0) * 40%) 0; pointer-events: none; mix-blend-mode: screen; }
 
 /* scroll length + pin */
-.fe-js .trip:not(.is-still) { height: 200svh; } /* the whole journey: two screens */
+.fe-js .trip:not(.is-still) { height: 600svh; }
+@media (max-width: 899px) { .fe-js .trip:not(.is-still) { height: 560svh; } }
 .fe-js .trip:not(.is-still) .trip__stage { position: sticky; top: 0; }
-.trip.is-still .trip__film, .trip.is-still .trip__star, .trip.is-still .panel, .trip.is-still .trip__progress { display: none; }
+.trip.is-still .trip__film, .trip.is-still .trip__point, .trip.is-still .panel { display: none; }
+.trip.is-still .trip__still { display: block; }
 @media (max-width: 899px) { .beat[data-final] .beat__aside { display: none; } }
 .trip.is-still .beat:not([data-still]) { display: none; }
 .trip.is-still .beat[data-still] .hl > *, .trip.is-still .beat[data-still] .beat__aside { opacity: 1; filter: none; transform: none; pointer-events: auto; }
