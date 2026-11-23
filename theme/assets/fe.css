@@ -152,8 +152,7 @@ body.fe { margin: 0; background: var(--ink); color: var(--ivory); font: 400 1rem
 .lam__card::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(115deg, rgba(255, 255, 255, 0.12), transparent 38%, transparent 62%, rgba(255, 255, 255, 0.05)); background-size: 220% 100%; background-position: calc(50% + var(--sheen, 0) * 40%) 0; pointer-events: none; mix-blend-mode: screen; }
 
 /* scroll length + pin */
-.fe-js .trip:not(.is-still) { height: 600svh; }
-@media (max-width: 899px) { .fe-js .trip:not(.is-still) { height: 560svh; } }
+.fe-js .trip:not(.is-still) { height: 300svh; } /* opens in the tunnel: three screens to the lámina */
 .fe-js .trip:not(.is-still) .trip__stage { position: sticky; top: 0; }
 .trip.is-still .trip__film, .trip.is-still .trip__point, .trip.is-still .panel { display: none; }
 .trip.is-still .trip__still { display: block; }

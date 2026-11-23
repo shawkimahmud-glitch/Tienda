@@ -76,7 +76,11 @@ function lamina(el) {
 // Six resting points (the headline of each stretch fully on screen). Inside the journey a wheel
 // gesture, a swipe or a key press glides to the next stop in that direction; the rest of the page
 // scrolls normally. Momentum and scrollbar drags settle on the nearest stop ahead.
-const STOPS = [0, 0.27, 0.5, 0.68, 0.85, 1];
+const STOPS = [0, 0.3, 0.55, 0.78, 1];
+// the journey opens inside the star tunnel: scroll progress p → time t of the film
+// (stops: tunnel 0.27 · Sun 0.50 · Earth 0.68 · sky 0.85 · lámina 1)
+const PT = [0.27, 0.5, 0.68, 0.85, 1];
+const tOf = (p) => { for (let i = 0; i < 4; i++) if (p <= STOPS[i + 1]) return PT[i] + (PT[i + 1] - PT[i]) * clamp((p - STOPS[i]) / (STOPS[i + 1] - STOPS[i])); return 1; };
 function stops(sec) {
   let busy = false, raf = 0, lastWheel = 0, lastAbs = 0, landed = 0, wheelDone = false, touch = null, lastY = scrollY, dir = 1, lastMove = 0;
   const top = () => sec.getBoundingClientRect().top + scrollY;
@@ -208,9 +212,10 @@ function trip(sec) {
     if (!visible) return;
     const d = target - p;
     p = Math.abs(d) < 0.0002 ? target : p + d * (fine ? 0.14 : 0.2);
+    const t = tOf(p);
     if (!dirty && p === target && mode !== 'live') return;
     dirty = false;
-    if (mode === 'frames') { player.draw(p); sunLive?.update(p, player.pack); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
+    if (mode === 'frames') { player.draw(t); sunLive?.update(t, player.pack); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
     if (mode === 'live' && scene) {
       // continuous performance guard: if any stretch of ~90 frames averages under ~30 fps, switch to the film
       const dt = time - lastFrame; lastFrame = time;
@@ -220,13 +225,13 @@ function trip(sec) {
         if ((ft.length >= 20 && avg(20) > 60) || (ft.length === 60 && avg(60) > 34)) { ft.length = 0; useFrames(); }
       }
       // at rest, render every other frame: the sun and the stars still breathe, the GPU rests
-      if (mode === 'live' && (p !== target || (idle++ & 1) === 0)) scene.frameAt(p, time / 1000);
+      if (mode === 'live' && (p !== target || (idle++ & 1) === 0)) scene.frameAt(t, time / 1000);
     }
     // write each value on the element that uses it (a variable on the stage would restyle every child)
-    const pt = (1 - clamp((p - 0.02) / 0.06)).toFixed(3), bar = p.toFixed(4);
+    const pt = (1 - clamp((t - 0.02) / 0.06)).toFixed(3), bar = p.toFixed(4);
     if (pt !== last.pt) { point.style.opacity = pt; point.style.visibility = pt === '0.000' ? 'hidden' : ''; last.pt = pt; }
     if (bar !== last.bar && progress) { progress.style.transform = `scaleX(${bar})`; last.bar = bar; }
-    const crisp = clamp((p - 0.965) / 0.03);
+    const crisp = clamp((t - 0.965) / 0.03);
     const cr = crisp.toFixed(3);
     if (cr !== last.cr) { lam.style.opacity = cr; last.cr = cr; }
     if (crisp > 0.98 !== lam.hasAttribute('data-live')) { lam.toggleAttribute('data-live', crisp > 0.98); if (crisp > 0.98) L.start(); }
