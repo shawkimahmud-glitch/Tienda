@@ -1,5 +1,5 @@
 {%- assign s = section.settings -%}
-<style>:root { --blue: {{ s.blue }}; }</style>
+<style>:root { --btn: {{ s.btn_color | default: '#D4AF63' }}; }</style>
 <header class="head">
   <a class="logo" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, inicio">{% render 'fe-icon', name: 'star' %}<i>{{ s.logo_a | escape }}</i><b>{{ s.logo_b | escape }}</b></a>
   <div class="head__end">
@@ -16,9 +16,9 @@
     </a>
   </div>
 </header>
-<div class="bar glass" role="region" aria-label="Comprar">
-  <p><strong>{{ s.price_prefix | escape }} {{ s.price | escape }}</strong><span>{{ s.bar_note | escape }}</span></p>
-  <a class="btn" href="{{ s.cta_link }}">{{ s.cta | escape }}{% render 'fe-icon', name: 'arrow' %}</a>
+{%- comment -%} Phone: one fixed buy button, hidden only while the creator is on screen. {%- endcomment -%}
+<div class="bar" data-bar>
+  <a class="btn btn--lg bar__btn" href="{{ s.cta_link }}">{{ s.bar_label | escape }}{% render 'fe-icon', name: 'arrow' %}</a>
 </div>
 {% schema %}
 {
@@ -28,10 +28,10 @@
     { "type": "text", "id": "logo_b", "label": "Logo (recta)", "default": "Estelar" },
     { "type": "text", "id": "price_prefix", "label": "Texto antes del precio", "default": "Desde" },
     { "type": "text", "id": "price", "label": "Precio más bajo", "default": "9,99 €" },
-    { "type": "text", "id": "bar_note", "label": "Nota de la barra móvil", "default": "Envío gratis · 4–8 días" },
     { "type": "text", "id": "cta", "label": "Botón", "default": "Crear mi lámina" },
-    { "type": "text", "id": "cta_link", "label": "Enlace del botón", "default": "#crea" },
-    { "type": "color", "id": "blue", "label": "Color del botón", "default": "#A9C2EE" }
+    { "type": "text", "id": "bar_label", "label": "Botón fijo del móvil", "default": "Crear mi lámina · desde 9,99 €" },
+    { "type": "text", "id": "cta_link", "label": "Enlace de los botones", "default": "#crea" },
+    { "type": "color", "id": "btn_color", "label": "Color de los botones", "default": "#D4AF63" }
   ],
   "blocks": [{ "type": "link", "name": "Píldora", "limit": 4, "settings": [
     { "type": "text", "id": "label", "label": "Texto", "default": "Diseñar" },

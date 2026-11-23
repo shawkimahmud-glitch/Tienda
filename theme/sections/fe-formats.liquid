@@ -15,7 +15,7 @@
       <h2 id="h-{{ section.id }}" class="hl hl--md" data-reveal><span>{{ s.line1 | escape }}</span><em>{{ s.line2 | escape }}</em></h2>
       <p class="lede">{{ s.text | escape }}</p>
     </div>
-    <fieldset style="border:0;margin:0;padding:0">
+    <fieldset class="fmts__set">
       <legend class="sr">{{ s.legend | escape }}</legend>
       <div class="fmts">
         {%- for block in section.blocks -%}
@@ -34,7 +34,7 @@
             endif
           -%}
           <label class="fmt glass" {{ block.shopify_attributes }}>
-            <input type="radio" name="format" value="{{ vid }}" data-price="{{ b.price | escape }}" data-title="{{ b.title | escape }}"{% if b.default %} checked{% endif %}>
+            <input type="radio" name="format" value="{{ vid }}" data-price="{{ b.price | escape }}" data-title="{{ b.title | escape }}"{% if b.digital %} data-digital{% endif %}{% if b.default %} checked{% endif %}>
             {%- if b.tag != blank %}<span class="fmt__tag">{{ b.tag | escape }}</span>{% else %}<span class="fmt__tag fmt__tag--ghost" aria-hidden="true">·</span>{% endif -%}
             <span class="fmt__t">{{ b.title | escape }}</span>
             <span class="fmt__m">{{ b.meta | escape }}</span>
@@ -46,9 +46,14 @@
     </fieldset>
     <div class="buy">
       <div class="buy__total"><span class="note">{{ s.total_label | escape }}</span><strong data-total>{{ s.total_default | escape }}</strong></div>
-      <ul class="facts">
+      <ul class="facts facts--ship">
         <li>{% render 'fe-icon', name: 'truck' %}{{ s.fact1 | escape }}</li>
         <li>{% render 'fe-icon', name: 'clock' %}{{ s.fact2 | escape }}</li>
+        <li>{% render 'fe-icon', name: 'user' %}{{ s.fact3 | escape }}</li>
+      </ul>
+      <ul class="facts facts--digital">
+        <li>{% render 'fe-icon', name: 'mail' %}{{ s.dfact1 | escape }}</li>
+        <li>{% render 'fe-icon', name: 'clock' %}{{ s.dfact2 | escape }}</li>
         <li>{% render 'fe-icon', name: 'user' %}{{ s.fact3 | escape }}</li>
       </ul>
       <a class="btn btn--lg" href="{{ base }}" data-buy data-magnetic>{{ s.button | escape }}{% render 'fe-icon', name: 'arrow' %}</a>
@@ -63,13 +68,15 @@
     { "type": "product", "id": "product", "label": "Producto" },
     { "type": "text", "id": "line1", "label": "Titular línea 1", "default": "Cuatro formatos," },
     { "type": "text", "id": "line2", "label": "Titular línea 2 (cursiva)", "default": "el mismo cielo." },
-    { "type": "textarea", "id": "text", "label": "Texto", "default": "Enmarcada, en papel o en digital. Envío gratis a toda España." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Enmarcada, en papel o en digital. Envío gratis en las láminas impresas." },
     { "type": "text", "id": "legend", "label": "Etiqueta accesible", "default": "Formato" },
     { "type": "text", "id": "total_label", "label": "Etiqueta total", "default": "Total" },
     { "type": "text", "id": "total_default", "label": "Total inicial", "default": "44,95 €" },
     { "type": "text", "id": "fact1", "label": "Dato 1", "default": "Envío gratis en España" },
     { "type": "text", "id": "fact2", "label": "Dato 2", "default": "Entrega en 4–8 días laborables" },
     { "type": "text", "id": "fact3", "label": "Dato 3", "default": "Sin crear cuenta" },
+    { "type": "text", "id": "dfact1", "label": "Formato digital: dato 1", "default": "Sin envío" },
+    { "type": "text", "id": "dfact2", "label": "Formato digital: dato 2", "default": "Te llega al email en minutos" },
     { "type": "text", "id": "button", "label": "Botón", "default": "Crear mi lámina" },
     { "type": "text", "id": "deadline", "label": "Fecha límite de Navidad (AAAA-MM-DD)", "default": "[FECHA LÍMITE NAVIDAD]", "info": "Con una fecha válida, el aviso cambia solo cuando pasa." },
     { "type": "text", "id": "urge_before", "label": "Aviso antes de la fecha ([FECHA] = la fecha)", "default": "Pide antes del [FECHA] y llega para Navidad." },
@@ -81,7 +88,8 @@
     { "type": "text", "id": "price", "label": "Precio", "default": "44,95 €" },
     { "type": "text", "id": "tag", "label": "Etiqueta" },
     { "type": "text", "id": "match", "label": "Palabra para encontrar la variante", "info": "Parte del nombre de la variante en Shopify, p. ej. «marco», «30×40», «A4», «Digital»." },
-    { "type": "checkbox", "id": "default", "label": "Marcado por defecto", "default": false }
+    { "type": "checkbox", "id": "default", "label": "Marcado por defecto", "default": false },
+    { "type": "checkbox", "id": "digital", "label": "Formato digital (sin envío)", "default": false }
   ] }],
   "presets": [{ "name": "FE · Formatos" }]
 }

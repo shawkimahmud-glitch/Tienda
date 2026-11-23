@@ -20,7 +20,7 @@ const slow = !!conn.saveData || /2g/.test(conn.effectiveType || '');
 root.classList.add('fe-js');
 if (reduced) root.classList.add('fe-reduced');
 window.__feBoot = true;
-// keep amounts and their units together: «4,95 €», «4–8 días», «30×40 cm», «23:41 h»
+// keep amounts and their units together: «9,99 €», «4–8 días», «30×40 cm»
 const nb = (t) => t.replace(/(\d) (?=€|días|cm|h\b)/g, '$1\u00a0');
 {
   const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -48,35 +48,11 @@ document.addEventListener('click', (e) => {
   el.focus({ preventScroll: true });
 });
 
-// ---------- the lámina that stays: drag to turn, spring back ----------
-function lamina(el) {
-  const card = $('.lam__card', el);
-  let rx = 0, ry = 0, vx = 0, vy = 0, tx = 0, ty = 0, drag = null, raf = 0, t0 = performance.now();
-  const K = 120, D = 14; // spring: stiffness, damping (≈ bounce 0.2)
-  const step = (now) => {
-    const dt = Math.min(0.032, (now - t0) / 1000); t0 = now;
-    const idle = drag ? 0 : Math.sin(now / 1600) * 3;
-    vx += (K * ((drag ? tx : 0) + idle * 0.4 - rx) - D * vx) * dt; rx += vx * dt;
-    vy += (K * ((drag ? ty : 0) + idle - ry) - D * vy) * dt; ry += vy * dt;
-    card.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
-    card.style.setProperty('--sheen', (ry / 18).toFixed(3));
-    raf = el.hasAttribute('data-live') ? requestAnimationFrame(step) : 0;
-  };
-  el.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, y: e.clientY }; el.setPointerCapture(e.pointerId); });
-  el.addEventListener('pointermove', (e) => {
-    if (drag) { ty = clamp((e.clientX - drag.x) / 6, -24, 24); tx = clamp(-(e.clientY - drag.y) / 8, -14, 14); }
-    else if (fine) { const r = el.getBoundingClientRect(); tx = 0; ty = 0; ry += ((e.clientX - r.left) / r.width - 0.5) * 0.6; }
-  });
-  const end = () => { drag = null; };
-  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
-  return { start() { if (!raf && !reduced) { t0 = performance.now(); raf = requestAnimationFrame(step); } } };
-}
-
 // ---------- stops: one gesture carries the film to the next stop ----------
-// Six resting points (the headline of each stretch fully on screen). Inside the journey a wheel
-// gesture, a swipe or a key press glides to the next stop in that direction; the rest of the page
-// scrolls normally. Momentum and scrollbar drags settle on the nearest stop ahead.
-const STOPS = [0, 0.27, 0.5, 0.68, 0.85, 1];
+// Four resting points (the star, the Sun, the Earth, the sky), each with its headline fully on screen.
+// Inside the journey a wheel gesture, a swipe or a key press glides to the next stop in that direction;
+// the rest of the page scrolls normally. Momentum and scrollbar drags settle on the nearest stop ahead.
+const STOPS = [0, 0.35, 0.67, 1];
 function stops(sec) {
   let busy = false, raf = 0, lastWheel = 0, lastAbs = 0, landed = 0, wheelDone = false, touch = null, lastY = scrollY, dir = 1, lastMove = 0;
   const top = () => sec.getBoundingClientRect().top + scrollY;
@@ -137,126 +113,163 @@ function stops(sec) {
   requestAnimationFrame(settle);
 }
 
-// ---------- the journey ----------
+// ---------- the journey: a golden star, then the Sun, the Earth and the sky, in two screens ----------
+// Scroll progress p (0..1 over the section) maps to the time t of the pre-rendered film, so the four
+// stops land on the star, the Sun (0.50), the Earth (0.68) and the drawn constellations (0.87).
+const PT = [0.41, 0.5, 0.68, 0.87];
+const tOf = (p) => { for (let i = 0; i < 3; i++) if (p <= STOPS[i + 1]) return PT[i] + (PT[i + 1] - PT[i]) * clamp((p - STOPS[i]) / (STOPS[i + 1] - STOPS[i])); return PT[3]; };
+// the packs hold only this stretch of the full render (frames i0..i1 of `full`)
+const FILM = { m: { file: 'fe-film-m.bin', full: 180, i0: 71, i1: 158 }, d: { file: 'fe-film-d.bin', full: 150, i0: 59, i1: 132 } };
+const ss = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+
 function trip(sec) {
   const stage = $('.trip__stage', sec);
-  let canvas = $('.trip__film', sec);
-  const lam = $('.lam', sec);
-  const ex = JSON.parse(sec.dataset.example);
-  $('[data-lam]', sec).innerHTML = posterSVG({ ...ex, city: undefined, cityName: ex.city, id: 'lam' });
+  const canvas = $('.trip__film', sec);
+  const hero = $('.trip__hero', sec);
+  const starCv = $('.trip__star', sec);
   const beats = $$('[data-beat]', sec);
   beats.forEach((b) => { b.inert = !b.hasAttribute('data-on'); });
   const portrait = innerHeight > innerWidth;
-  const showStill = () => {
-    sec.classList.add('is-still');
-    const img = $('.trip__still', sec);
-    img.src = portrait ? img.dataset.srcM : img.dataset.srcD;
-  };
+  const film = portrait ? FILM.m : FILM.d;
+  const media = sec.dataset.media;
   const gl = (() => { try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch { return false; } })();
-  if (reduced || !gl && !window.createImageBitmap) return showStill();
+  // less motion asked, or nothing to draw with: the still star and the first headline
+  if (reduced || (!gl && !window.createImageBitmap)) { sec.classList.add('is-still'); return; }
 
-  const L = lamina(lam);
-  let target = 0, p = 0, dirty = true, visible = true, mode = null, player = null, scene = null, sunLive = null;
+  let target = 0, p = 0, dirty = true, visible = true, player = null, sunLive = null, star = null;
   ScrollTrigger.create({ trigger: sec, start: 'top top', end: 'bottom bottom', onUpdate: (s) => { target = s.progress; dirty = true; } });
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(sec);
 
   const useFrames = () => {
-    if (mode === 'frames') return;
-    scene?.dispose(); scene = null; mode = 'frames'; sec.dataset.mode = mode;
-    const url = portrait ? sec.dataset.framesM : sec.dataset.framesD;
-    if (canvas.dataset.used) { const c = canvas.cloneNode(); canvas.replaceWith(c); canvas = c; }
     player = new SequencePlayer(canvas, { cache: portrait ? 10 : 14 });
     player.onReady = () => { dirty = true; };
     sec.__player = player;
-    const pack = new FramePack(url, { maxFrames: slow ? 24 : Infinity, onFrame: () => { dirty = true; } });
+    const pack = new FramePack(media + film.file, { maxFrames: slow ? 24 : Infinity, onFrame: () => { dirty = true; } });
     player.setPack(pack);
-    pack.load().catch(() => { if (!pack.loaded) showStill(); });
+    pack.load().catch(() => {});
     // the frames hold the film; a tiny live layer keeps the sun's surface boiling while you rest on it
-    if (!slow && !sunLive) sunLive = sunOverlay(stage, canvas, sec.dataset.media + (portrait ? 'fe-sun-m.json' : 'fe-sun-d.json'));
+    if (!slow && gl) sunLive = sunOverlay(stage, canvas, media + (portrait ? 'fe-sun-m.json' : 'fe-sun-d.json'));
   };
-  const useLive = async () => {
-    mode = 'live'; sec.dataset.mode = mode;
-    try {
-      const { createTunnel } = await import('./scene/tunnel.js');
-      canvas.dataset.used = '1';
-      const dpr = Math.min(devicePixelRatio || 1, 1.5);
-      scene = createTunnel({ canvas, media: sec.dataset.media, quality: 'live', example: ex, poster: portrait ? { h: 0.5, cy: 0.42 } : { h: 0.62, cy: 0.47, cx: 0.64 } });
-      scene.resize(stage.clientWidth, stage.clientHeight, dpr);
-      await scene.ready;
-      dirty = true;
-    } catch { useFrames(); }
-  };
-  const force = new URLSearchParams(location.search).get('fe');
-  const wantLive = force === 'live' || force === 'probe' || (force !== 'film' && !portrait && fine && innerWidth >= 900 && gl && !slow && (navigator.hardwareConcurrency || 8) >= 6);
-  const start = () => (wantLive ? useLive() : useFrames());
-  // first paint is the black field and the gold point (CSS); the 3D comes after load
-  if (document.readyState === 'complete') setTimeout(start, 50); else addEventListener('load', () => setTimeout(start, 50), { once: true });
 
-  // in frames mode, place the DOM lámina where the frames drew it (cover crop aware)
-  const fitLam = () => {
-    const pk = player?.pack; if (!pk?.width) return;
-    const P = portrait ? { h: 0.5, cy: 0.42, cx: 0.5 } : { h: 0.62, cy: 0.47, cx: 0.64 };
-    const vw = stage.clientWidth, vh = stage.clientHeight, k = Math.max(vw / pk.width, vh / pk.height);
-    const fw = pk.width * k, fh = pk.height * k;
-    lam.style.setProperty('--lam-h', ((P.h * fh) / vh).toFixed(4));
-    lam.style.setProperty('--lam-cy', ((P.cy * fh + (vh - fh) / 2) / vh).toFixed(4));
-    lam.style.setProperty('--lam-cx', ((P.cx * fw + (vw - fw) / 2) / vw).toFixed(4));
+  // ---- the star follows the finger, the pointer and the gyroscope ----
+  const inp = { x: 0, y: 0, tx: 0, ty: 0, spin: 0, v: 0, drag: null, gyro: null, asked: false };
+  stage.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'mouse') { inp.tx = (e.clientX / innerWidth) * 2 - 1; inp.ty = (e.clientY / innerHeight) * 2 - 1; }
+    else if (inp.drag) { const dx = e.clientX - inp.drag.x; inp.drag.x = e.clientX; inp.v = dx * 0.012; inp.spin += dx * 0.012; }
+  });
+  stage.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') inp.drag = { x: e.clientX, x0: e.clientX, y0: e.clientY }; });
+  const askGyro = () => {
+    const D = window.DeviceOrientationEvent;
+    if (D && typeof D.requestPermission === 'function' && !inp.asked) { inp.asked = true; D.requestPermission().catch(() => {}); }
   };
-  const point = $('.trip__point', sec), progress = $('.trip__progress i', sec), last = {};
-  let lastFrame = 0, idle = 0; const ft = [];
+  stage.addEventListener('pointerup', (e) => {
+    // a tap on the star: iOS asks once for the motion sensor
+    if (inp.drag && Math.hypot(e.clientX - inp.drag.x0, e.clientY - inp.drag.y0) < 8 && p < 0.1) askGyro();
+    inp.drag = null;
+  });
+  stage.addEventListener('pointercancel', () => { inp.drag = null; });
+  addEventListener('deviceorientation', (e) => {
+    if (e.beta == null) return;
+    inp.gyro ??= { b: e.beta, g: e.gamma };
+    inp.tx = clamp((e.gamma - inp.gyro.g) / 22, -1, 1); inp.ty = clamp((e.beta - inp.gyro.b) / 22, -1, 1);
+  });
+
+  // Three.js arrives after the page has loaded: the first paint is the still star, which the live one replaces
+  const useStar = async () => {
+    if (!gl) return;
+    try {
+      const { createStar } = await import('./scene/star.js');
+      star = createStar({ canvas: starCv });
+      star.dpr = Math.min(devicePixelRatio || 1, portrait ? 1.75 : 1.5);
+      star.resize(stage.clientWidth, stage.clientHeight, star.dpr);
+      star.t0 = performance.now() / 1000 - 2.2; // the still was rendered at t = 2.2 s: the live star takes over without a jump
+      star.frame(2.2, { x: 0, y: 0, spin: 0, dive: 0 });
+      requestAnimationFrame(() => sec.classList.add('has-star'));
+    } catch { star = null; }
+  };
+  const start = async () => { await useStar(); useFrames(); };
+  if (document.readyState === 'complete') setTimeout(start, 30); else addEventListener('load', () => setTimeout(start, 30), { once: true });
+
+  const progress = $('.trip__progress i', sec), last = {};
+  let lastT = 0; const ft = [];
   const tick = (time) => {
     if (!visible) return;
+    const dt = lastT ? Math.min(0.05, (time - lastT) / 1000) : 0.016; lastT = time;
     const d = target - p;
     p = Math.abs(d) < 0.0002 ? target : p + d * (fine ? 0.14 : 0.2);
-    if (!dirty && p === target && mode !== 'live') return;
-    dirty = false;
-    if (mode === 'frames') { player.draw(p); sunLive?.update(p, player.pack); if (!lam.dataset.fit && player.pack?.width) { lam.dataset.fit = 1; fitLam(); } }
-    if (mode === 'live' && scene) {
-      // continuous performance guard: if any stretch of ~90 frames averages under ~30 fps, switch to the film
-      const dt = time - lastFrame; lastFrame = time;
-      if (dt > 0 && dt < 3000 && force !== 'live') {
-        ft.push(dt); if (ft.length > 60) ft.shift();
-        const avg = (n) => ft.slice(-n).reduce((a, b) => a + b, 0) / n;
-        if ((ft.length >= 20 && avg(20) > 60) || (ft.length === 60 && avg(60) > 34)) { ft.length = 0; useFrames(); }
+    const t = tOf(p);
+
+    // the star: drawn only while it is on screen; it dives into the light as the film takes over
+    const ha = (1 - ss((p - 0.05) / 0.2)).toFixed(3);
+    if (ha !== last.ha) { hero.style.opacity = ha; hero.style.visibility = ha === '0.000' ? 'hidden' : ''; last.ha = ha; }
+    if (star && ha !== '0.000') {
+      inp.x += (inp.tx - inp.x) * Math.min(1, dt * 4); inp.y += (inp.ty - inp.y) * Math.min(1, dt * 4);
+      if (!inp.drag) { inp.spin += inp.v; inp.v *= Math.exp(-dt * 3); }
+      star.frame(performance.now() / 1000 - star.t0, { x: inp.x, y: inp.y, spin: inp.spin, dive: clamp(p / 0.24) });
+      // a phone that cannot keep up gets fewer pixels, then the still star
+      ft.push(dt); if (ft.length > 40) ft.shift();
+      const avg = ft.reduce((a, b) => a + b, 0) / ft.length;
+      if (ft.length === 40 && avg > 0.045 && !/[?&]fe=live/.test(location.search)) {
+        ft.length = 0;
+        if (star.dpr > 1) { star.dpr = 1; star.resize(stage.clientWidth, stage.clientHeight, 1); }
+        else { sec.classList.remove('has-star'); star.dispose(); star = null; }
       }
-      // at rest, render every other frame: the sun and the stars still breathe, the GPU rests
-      if (mode === 'live' && (p !== target || (idle++ & 1) === 0)) scene.frameAt(p, time / 1000);
     }
-    // write each value on the element that uses it (a variable on the stage would restyle every child)
-    const pt = (1 - clamp((p - 0.02) / 0.06)).toFixed(3), bar = p.toFixed(4);
-    if (pt !== last.pt) { point.style.opacity = pt; point.style.visibility = pt === '0.000' ? 'hidden' : ''; last.pt = pt; }
+
+    const fa = ss((p - 0.03) / 0.12).toFixed(3);
+    if (fa !== last.fa) { canvas.style.opacity = fa; last.fa = fa; }
+    if (!dirty && p === target) return;
+    dirty = false;
+    if (player) { player.draw(clamp((t * (film.full - 1) - film.i0) / (film.i1 - film.i0))); sunLive?.update(t, player.pack); }
+    const bar = p.toFixed(4);
     if (bar !== last.bar && progress) { progress.style.transform = `scaleX(${bar})`; last.bar = bar; }
-    const crisp = clamp((p - 0.965) / 0.03);
-    const cr = crisp.toFixed(3);
-    if (cr !== last.cr) { lam.style.opacity = cr; last.cr = cr; }
-    if (crisp > 0.98 !== lam.hasAttribute('data-live')) { lam.toggleAttribute('data-live', crisp > 0.98); if (crisp > 0.98) L.start(); }
     const pc = p * 100;
     for (const b of beats) {
       const on = pc >= +b.dataset.from && pc < +b.dataset.to;
       if (on !== b.hasAttribute('data-on')) { b.toggleAttribute('data-on', on); b.inert = !on; }
     }
   };
-  gsap.ticker.add((t) => tick(t * 1000));
+  gsap.ticker.add((tm) => tick(tm * 1000));
   stops(sec);
-  new ResizeObserver(() => { player?.resize(); if (mode === 'frames') fitLam(); scene?.resize(stage.clientWidth, stage.clientHeight, Math.min(devicePixelRatio || 1, 1.5)); dirty = true; }).observe(stage);
+  new ResizeObserver(() => { player?.resize(); star?.resize(stage.clientWidth, stage.clientHeight, star.dpr); dirty = true; }).observe(stage);
 }
 
 // ---------- creator: the lámina redraws as you type ----------
+// Date and time are typed the Spanish way (DD/MM/AAAA, 24 h) whatever the browser's locale:
+// the slashes and the colon appear on their own, and the lámina keeps the last valid value.
 const state = { names: '', phrase: '', city: 'Madrid', date: '2021-05-14', time: '22:00', style: 'noche' };
+const maskDate = (v) => { const d = v.replace(/\D/g, '').slice(0, 8); return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('/'); };
+const maskTime = (v) => { const d = v.replace(/\D/g, '').slice(0, 4); return d.length > 2 ? `${d.slice(0, 2)}:${d.slice(2)}` : d; };
+const isoDate = (v) => {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v); if (!m) return null;
+  const [, d, mo, y] = m.map(Number), dt = new Date(Date.UTC(y, mo - 1, d));
+  if (y < 1900 || y > 2100 || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) return null;
+  return `${m[3]}-${m[2]}-${m[1]}`;
+};
+const isoTime = (v) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(v) ? v : null);
 function creator(sec) {
   const form = $('[data-form]', sec), prev = $('[data-preview]', sec), coords = $('[data-coords]', sec);
   if (!form) return;
   const sel = form.elements.city, cur = sel.value || 'Madrid';
   sel.innerHTML = CITIES.map((c) => `<option${c[0] === cur ? ' selected' : ''}>${c[0]}</option>`).join('');
+  const fd = form.elements.date, ftm = form.elements.time;
   let raf = 0;
   const draw = () => {
     raf = 0;
     const f = form.elements;
-    Object.assign(state, { names: f.names.value.trim(), phrase: f.phrase.value.trim(), city: f.city.value, date: f.date.value || '2021-05-14', time: f.time.value || '22:00', style: form.querySelector('[name=style]:checked')?.value || 'noche' });
+    const date = isoDate(fd.value), time = isoTime(ftm.value);
+    fd.setAttribute('aria-invalid', String(fd.value.length === 10 && !date));
+    ftm.setAttribute('aria-invalid', String(ftm.value.length === 5 && !time));
+    Object.assign(state, { names: f.names.value.trim(), phrase: f.phrase.value.trim(), city: f.city.value, date: date || state.date, time: time || state.time, style: form.querySelector('[name=style]:checked')?.value || 'noche' });
     prev.innerHTML = posterSVG({ ...state, names: state.names || 'Vuestros nombres', cityName: state.city, id: 'cp' });
     const c = cityByName(state.city);
-    coords.textContent = nb(`${c[0]} · ${fmtCoords(c[1], c[2])} · ${fmtDateDots(state.date)} · ${state.time} h`);
+    coords.textContent = nb(`${c[0]} · ${fmtCoords(c[1], c[2])} · ${fmtDateDots(state.date)} · ${state.time}`);
   };
+  const mask = (el, fn) => el.addEventListener('input', (e) => {
+    if (e.inputType?.startsWith('delete')) return; // let backspace remove a slash or the colon
+    const v = fn(el.value); if (v !== el.value) el.value = v;
+  });
+  mask(fd, maskDate); mask(ftm, maskTime);
   form.addEventListener('input', () => { raf ||= requestAnimationFrame(draw); });
   form.addEventListener('submit', (e) => e.preventDefault());
   if (reduced) draw(); else new IntersectionObserver(([e], o) => { if (e.isIntersecting) { draw(); o.disconnect(); } }, { rootMargin: '600px' }).observe(sec);
@@ -269,6 +282,7 @@ function formats(sec) {
     const r = $('input[name=format]:checked', sec);
     if (!r) return;
     total.textContent = nb(r.dataset.price);
+    sec.toggleAttribute('data-digital', r.hasAttribute('data-digital')); // shipping facts only for printed láminas
     const u = new URL(sec.dataset.base, location.href);
     if (r.value) u.searchParams.set('variant', r.value);
     buy.href = u.pathname + u.search;
@@ -278,7 +292,7 @@ function formats(sec) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(dl)) {
     const end = new Date(dl + 'T23:59:59');
     const [y, m, d] = dl.split('-');
-    urge.textContent = Date.now() > end ? urge.dataset.after : urge.dataset.before.replace('[FECHA]', `${+d}/${+m}/${y}`);
+    urge.textContent = Date.now() > end ? urge.dataset.after : urge.dataset.before.replace('[FECHA]', `${d}/${m}/${y}`);
   }
 }
 
@@ -380,10 +394,17 @@ function navState() {
   map.forEach((_, id) => { const el = document.getElementById(id); if (el) io.observe(el); });
 }
 
+// ---------- the phone's buy button: always there, except while the creator is on screen ----------
+function buyBar() {
+  const bar = $('[data-bar]'), maker = $('[data-creator]');
+  if (!bar || !maker) return;
+  new IntersectionObserver(([e]) => { bar.toggleAttribute('data-away', e.isIntersecting); }, { threshold: 0.12 }).observe(maker);
+}
+
 $$('[data-trip]').forEach(trip);
 $$('[data-creator]').forEach(creator);
 $$('[data-formats]').forEach(formats);
 $$('[data-warp]').forEach(warp);
-minis(); tilt(); magnetic(); reveals(); navState();
+minis(); tilt(); magnetic(); reveals(); navState(); buyBar();
 addEventListener('load', () => ScrollTrigger.refresh());
 document.fonts?.ready.then(() => ScrollTrigger.refresh());

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Estrella · render</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+import { createStar } from '/src/scene/star.js';
+const q = new URLSearchParams(location.search);
+const W = +q.get('w') || 1080, H = +q.get('h') || 1920;
+const c = document.getElementById('c'); c.style.width = W + 'px'; c.style.height = H + 'px';
+const S = createStar({ canvas: c, quality: 'high' });
+S.resize(W, H, +q.get('dpr') || 1);
+window.renderAt = (t, x = 0, y = 0, dive = 0) => { S.frame(t, { x, y, spin: 0, dive }); return new Promise((r) => requestAnimationFrame(() => r(true))); };
+window.grab = () => c.toDataURL('image/png');
+window.starReady = true;
+</script></body></html>

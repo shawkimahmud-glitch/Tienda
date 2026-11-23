@@ -3,7 +3,7 @@ name: Fecha Estelar
 description: El cielo real de vuestra noche, en una lámina.
 colors:
   space-black: "#05070D"
-  night-blue: "#0B1426"
+  warm-night: "#15110A"
   starlight-gold: "#D4AF63"
   ivory: "#F3EBD8"
   ivory-soft: "rgba(243, 235, 216, 0.74)"
@@ -11,11 +11,11 @@ colors:
   hairline: "rgba(243, 235, 216, 0.12)"
   glass: "rgba(255, 255, 255, 0.06)"
   glass-edge: "rgba(255, 255, 255, 0.12)"
-  pale-blue: "#A9C2EE"
-  pale-blue-hover: "#C3D5F5"
+  button-gold: "#D4AF63"
+  button-gold-hover: "color-mix(in oklab, #D4AF63 84%, #fff)"
 typography:
   display:
-    fontFamily: "Inter Tight, system-ui, sans-serif"
+    fontFamily: "Geist, system-ui, sans-serif"
     fontSize: "clamp(2.45rem, 6.2vw, 6rem)"
     fontWeight: 300
     lineHeight: 0.98
@@ -27,7 +27,7 @@ typography:
     lineHeight: 0.92
     letterSpacing: "-0.01em"
   headline:
-    fontFamily: "Inter Tight, system-ui, sans-serif"
+    fontFamily: "Geist, system-ui, sans-serif"
     fontSize: "clamp(2.2rem, 4.6vw, 4.4rem)"
     fontWeight: 300
     lineHeight: 0.98
@@ -38,12 +38,12 @@ typography:
     fontWeight: 400
     lineHeight: 1
   body:
-    fontFamily: "Inter Tight, system-ui, sans-serif"
+    fontFamily: "Geist, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.55
   label:
-    fontFamily: "Inter Tight, system-ui, sans-serif"
+    fontFamily: "Geist, system-ui, sans-serif"
     fontSize: "0.86rem"
     fontWeight: 400
     lineHeight: 1.4
@@ -60,15 +60,15 @@ spacing:
   stack: "18px"
 components:
   button-primary:
-    backgroundColor: "{colors.pale-blue}"
+    backgroundColor: "{colors.button-gold}"
     textColor: "{colors.space-black}"
     rounded: "{rounded.pill}"
     padding: "0 24px"
     height: "48px"
   button-primary-hover:
-    backgroundColor: "{colors.pale-blue-hover}"
+    backgroundColor: "{colors.button-gold-hover}"
   button-primary-lg:
-    backgroundColor: "{colors.pale-blue}"
+    backgroundColor: "{colors.button-gold}"
     textColor: "{colors.space-black}"
     rounded: "{rounded.pill}"
     padding: "0 30px"
@@ -108,37 +108,37 @@ Una sola toma de cine que el visitante conduce con el scroll y que acaba convert
 Densidad baja, mucho aire, tipografía grande abajo a la izquierda y cristal esmerilado solo donde hay información que leer sobre la imagen. La técnica de la toma continua viene de la plantilla «Frozen Cave» de motionsites (empuje de cámara hacia un túnel, titular por tramos, paneles de cristal, píldoras); el contenido y el mundo son propios.
 
 **Key Characteristics:**
-- Fondo espacial #05070D y azul noche #0B1426; marfil para el texto.
-- Oro #D4AF63 solo como luz y como detalle de estado.
+- Fondo espacial #05070D y noche cálida #15110A; marfil para el texto. Ningún azul en la interfaz.
+- Oro #D4AF63 como luz, como estado y como el único botón.
 - Titulares en dos líneas: sans fina + serif cursiva.
 - Cristal (6 % blanco, blur 18px, borde 12 %) para paneles, píldoras, tarjetas e inputs.
-- Un único botón: píldora azul pálido con texto negro.
+- Un único botón: píldora dorada #D4AF63 con texto #05070D y brillo dorado suave al pulsar.
 
 ## Colors
 
 Casi monocromo nocturno, con una luz cálida y un acento frío reservado a la acción.
 
 ### Primary
-- **Azul pálido de acción** (#A9C2EE): el único color de los botones de compra y avance; hover #C3D5F5. Texto siempre #05070D (contraste > 9:1).
+- **Oro de acción** (#D4AF63): el único color de los botones de compra y avance (editable en la cabecera); hover un 16 % más claro; al pulsar, escala .97 y un halo dorado. Texto siempre #05070D (contraste 9,6:1). Foco: anillo marfil.
 
 ### Secondary
 - **Oro de luz estelar** (#D4AF63): luz en la película, líneas de constelaciones, estrella del logo, etiquetas de formato, estado seleccionado de un formato, iconos de datos.
 
 ### Neutral
 - **Negro espacial** (#05070D): fondo de página y de la película.
-- **Azul noche** (#0B1426): fondo de la lámina, brillo radial de las secciones.
+- **Noche cálida** (#15110A): fondos de tarjetas y brillo radial de las secciones. (El azul noche queda solo dentro de la lámina, que es el producto.)
 - **Marfil** (#F3EBD8): texto principal; 74 % para secundario, 56 % para notas (ambos ≥ 4.5:1 sobre el negro).
 - **Línea fina** (marfil 12 %): separadores y bordes de FAQ.
 
 ### Named Rules
-**The Gold Is Light Rule.** El oro nunca rellena una superficie ni un botón: aparece como luz o como marca de estado.
-**The One Button Rule.** Solo existe un estilo de botón de acción (azul pálido). Todo lo demás son píldoras de cristal o enlaces subrayados.
+**The Gold Is Light Rule.** El oro nunca rellena una superficie grande: aparece como luz, como estado y en el botón de acción.
+**The One Button Rule.** Solo existe un estilo de botón de acción (dorado). Todo lo demás son píldoras de cristal o enlaces subrayados.
 
 ## Typography
 
-**Display Font:** Inter Tight (con system-ui)
+**Display Font:** Geist 300 (con system-ui)
 **Italic Display:** Instrument Serif cursiva (con Georgia)
-**Body Font:** Inter Tight
+**Body Font:** Geist
 
 **Character:** Una sans fina y técnica que mide, y una serif cursiva que emociona; siempre juntas en dos líneas cortas.
 
@@ -172,8 +172,8 @@ Píldoras para todo lo que se pulsa (botones, menú, etiquetas, selector de esti
 
 ### Buttons
 - **Shape:** píldora (999px).
-- **Primary:** fondo #A9C2EE, texto #05070D, 48px de alto (56px en la versión grande), flecha que avanza 3px en hover.
-- **Hover / Focus:** fondo #C3D5F5 en 200ms; foco con anillo azul de 2px separado 4px; pulsación scale(.97) en 160ms.
+- **Primary:** fondo #D4AF63, texto #05070D, 48px de alto (56px en la versión grande), flecha que avanza 3px en hover.
+- **Hover / Focus / Press:** oro un 16 % más claro en 200ms; foco con anillo marfil de 2px separado 4px; pulsación scale(.97) con halo dorado en 160–240ms.
 
 ### Chips (format tags)
 - **Style:** contorno oro al 55 %, texto oro, 0.76rem.
@@ -188,13 +188,13 @@ Píldoras para todo lo que se pulsa (botones, menú, etiquetas, selector de esti
 
 ### Inputs / Fields
 - **Style:** cristal 6 %, borde 12 %, 54px, radio 14px.
-- **Focus:** borde azul pálido al 80 % y fondo 9 %.
+- **Focus:** borde oro al 75 % y fondo 9 %. Fecha DD/MM/AAAA y hora 24 h escritas a mano (máscara), nunca el selector del navegador.
 
 ### Navigation
 - Logo «*Fecha* Estelar» a la izquierda; a la derecha una cápsula de cristal con píldoras (activa: fondo marfil, texto negro), precio «Desde 4,95 €» y el botón azul. En móvil: logo + cesta arriba y barra de compra fija abajo.
 
 ### Signature: el túnel y la lámina
-Película controlada por el scroll (escena Three.js en vivo en escritorio, 180 fotogramas en móvil) con titular por tramos, paneles de cristal en las paradas y una lámina final que gira con el dedo con un muelle.
+Una estrella dorada y cristalina en 3D (Three.js, material físico y bloom) que gira despacio y sigue el dedo o el giroscopio; al bajar se convierte en el Sol y la película (88 fotogramas en móvil) recorre la Tierra y el cielo en dos pantallas, con cuatro paradas con titular por tramos, paneles de cristal en las paradas y una lámina final que gira con el dedo con un muelle.
 
 ## Do's and Don'ts
 
@@ -205,7 +205,7 @@ Película controlada por el scroll (escena Three.js en vivo en escritorio, 180 f
 - **Do** calcular cada lámina de ejemplo con una fecha y una ciudad reales.
 
 ### Don't:
-- **Don't** añadir un segundo estilo de botón ni botones dorados.
+- **Don't** añadir un segundo estilo de botón ni usar azul en la interfaz.
 - **Don't** usar reseñas, contadores o cifras inventadas.
 - **Don't** poner una etiqueta pequeña encima de un titular.
 - **Don't** animar con `ease-in` ni por encima de 300ms en interfaz (los titulares de la película son la excepción narrativa).

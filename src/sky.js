@@ -65,7 +65,7 @@ export function computeSky({ date, time, lat, lon, tz }) {
 
 // ---------- formatting ----------
 const MONTHS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-export const fmtDateDots = (date) => { const [y, m, d] = date.split('-'); return `${d}.${m}.${y}`; };
+export const fmtDateDots = (date) => { const [y, m, d] = date.split('-'); return `${d}/${m}/${y}`; };
 export const fmtDateLong = (date) => { const [y, m, d] = date.split('-').map(Number); return `${d} de ${MONTHS[m - 1]} de ${y}`; };
 export function fmtCoord(v, pos, neg) {
   const a = Math.abs(v), d = Math.floor(a), m = Math.round((a - d) * 60);
@@ -120,8 +120,8 @@ export function posterSVG(o) {
 <text x="150" y="${P.namesY}" font-family="'Instrument Serif',Georgia,serif" font-size="25" fill="${c.ink}" letter-spacing=".2">${esc(o.names)}</text>
 <text x="150" y="${P.phraseY}" font-family="'Instrument Serif',Georgia,serif" font-style="italic" font-size="10.5" fill="${c.gold}">${esc(o.phrase)}</text>
 <path d="M128 ${P.lineY}H172" stroke="${c.gold}" stroke-width=".4"/>
-<text x="150" y="${P.cityY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="6.6" font-weight="600" letter-spacing="2.6" fill="${c.ink}">${esc(city[0].toUpperCase())}</text>
-<text x="150" y="${P.dateY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="6" letter-spacing="1.8" fill="${c.sub}">${fmtDateDots(o.date)} · ${esc(o.time)} H</text>
-<text x="150" y="${P.coordY}" font-family="'Inter Tight',system-ui,sans-serif" font-size="5.6" letter-spacing="1.4" fill="${c.sub}">${fmtCoords(lat, lon)}</text>
+<text x="150" y="${P.cityY}" font-family="'Geist',system-ui,sans-serif" font-size="6.6" font-weight="600" letter-spacing="2.6" fill="${c.ink}">${esc(city[0].toUpperCase())}</text>
+<text x="150" y="${P.dateY}" font-family="'Geist',system-ui,sans-serif" font-size="6" letter-spacing="1.8" fill="${c.sub}">${fmtDateDots(o.date)} · ${esc(o.time)}</text>
+<text x="150" y="${P.coordY}" font-family="'Geist',system-ui,sans-serif" font-size="5.6" letter-spacing="1.4" fill="${c.sub}">${fmtCoords(lat, lon)}</text>
 </g></svg>`;
 }

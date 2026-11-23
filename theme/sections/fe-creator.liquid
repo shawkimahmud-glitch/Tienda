@@ -25,8 +25,9 @@
             <label class="field"><span>{{ s.l_phrase | escape }}</span><input class="input" name="phrase" value="{{ s.d_phrase | escape }}" maxlength="60" autocomplete="off"></label>
             <label class="field"><span>{{ s.l_city | escape }}</span><select class="input" name="city"><option selected>{{ s.d_city | escape }}</option></select></label>
             <div class="row2">
-              <label class="field"><span>{{ s.l_date | escape }}</span><input class="input" type="date" name="date" value="{{ s.d_date }}" min="1900-01-01" max="2100-12-31"></label>
-              <label class="field"><span>{{ s.l_time | escape }}</span><input class="input" type="time" name="time" value="{{ s.d_time }}"></label>
+              <label class="field"><span>{{ s.l_date | escape }}</span><input class="input" name="date" lang="es" inputmode="numeric" autocomplete="off" placeholder="DD/MM/AAAA" maxlength="10" pattern="\d{2}/\d{2}/\d{4}" value="{{ s.d_date | date: '%d/%m/%Y' }}" aria-describedby="fmt-{{ section.id }}"></label>
+              <label class="field"><span>{{ s.l_time | escape }}</span><input class="input" name="time" lang="es" inputmode="numeric" autocomplete="off" placeholder="HH:MM" maxlength="5" pattern="([01]\d|2[0-3]):[0-5]\d" value="{{ s.d_time }}" aria-describedby="fmt-{{ section.id }}"></label>
+              <p class="sr" id="fmt-{{ section.id }}">Fecha en formato día/mes/año y hora de 0 a 23.</p>
             </div>
             <fieldset class="make__set">
               <legend class="note make__legend">{{ s.l_style | escape }}</legend>
@@ -57,7 +58,7 @@
     { "type": "text", "id": "l_date", "label": "Etiqueta fecha", "default": "Fecha" },
     { "type": "text", "id": "d_date", "label": "Fecha por defecto (AAAA-MM-DD)", "default": "2021-05-14" },
     { "type": "text", "id": "l_time", "label": "Etiqueta hora", "default": "Hora" },
-    { "type": "text", "id": "d_time", "label": "Hora por defecto", "default": "23:41" },
+    { "type": "text", "id": "d_time", "label": "Hora por defecto (HH:MM, 24 h)", "default": "23:41" },
     { "type": "text", "id": "l_style", "label": "Etiqueta estilo", "default": "Estilo" },
     { "type": "text", "id": "button", "label": "Botón", "default": "Elegir formato" }
   ],
